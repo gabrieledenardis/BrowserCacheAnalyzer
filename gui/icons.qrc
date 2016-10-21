@@ -3,5 +3,10 @@
     <file>icons/button_minimize.png</file>
     <file>icons/button_close.png</file>
     <file>icons/magnifying_glass.png</file>
+    <file>icons/chrome_64x64.png</file>
+    <file>icons/firefox_64x64.png</file>
+    <file>icons/opera_64x64.png</file>
+    <file>icons/arrow_left.png</file>
+    <file>icons/arrow_right.png</file>
 </qresource>
 </RCC>

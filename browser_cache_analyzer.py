@@ -41,6 +41,22 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.button_minimize_application.clicked.connect(self.showMinimized)
 
 
+###########################
+# SECTION: WELCOME SCREEN #
+###########################
+
+        # "Welcome screen": "groupBox_system_info", "groupBox_selected_browser_info", application title
+        # and application icon are not visible
+
+        self.stackedWidget.setCurrentIndex(0)
+
+        if self.stackedWidget.currentIndex() == 0:
+            self.groupBox_selected_browser_info.setVisible(False)
+            self.label_application_title.setVisible(False)
+            self.label_application_icon.setVisible(False)
+            self.groupBox_system_info.setVisible(False)
+
+
 ##############################
 # SECTION: CLOSE APPLICATION #
 ##############################
