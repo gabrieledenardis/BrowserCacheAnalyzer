@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>icons/button_minimize.png</file>
+    <file>icons/button_close.png</file>
+    <file>icons/magnifying_glass.png</file>
+</qresource>
+</RCC>

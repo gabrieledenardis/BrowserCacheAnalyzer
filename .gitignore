@@ -1,0 +1,7 @@
+# PyCharm IDE settings files
+.idea
+
+# Project files
+*.pyc
+gui/bca_converted_gui.py
+gui/icons_rc.py
