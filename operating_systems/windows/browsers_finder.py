@@ -8,7 +8,7 @@ except ImportError:
     _winreg = None
 
 # Project imports
-from utilities import browsers_utils, general_utils
+from utilities import browsers_utils, utils
 
 
 def finder():
@@ -33,7 +33,7 @@ def finder():
         # Opening uninstall key
         uninstall_key = _winreg.OpenKey(
             _winreg.HKEY_LOCAL_MACHINE,
-            general_utils.UNINSTALL_KEY,
+            utils.UNINSTALL_KEY,
             0,
             _winreg.KEY_READ
         )
@@ -47,7 +47,7 @@ def finder():
                     # A browser in "user installed browsers" matches a sub key name
                     if browser in uninstall_sub_key_name.lower():
                         # Matching browser key name
-                        browser_key_name = "\\".join([general_utils.UNINSTALL_KEY, uninstall_sub_key_name])
+                        browser_key_name = "\\".join([utils.UNINSTALL_KEY, uninstall_sub_key_name])
                         try:
                             # Opening matching browser key
                             browser_key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, browser_key_name,
