@@ -9,11 +9,11 @@ from PyQt4 import QtCore
 import platform
 import os
 
-
 # Project imports
 from gui import bca_converted_gui
 from operating_systems import windows
 from utilities import utils, browsers_utils
+from browsers import chrome
 
 
 class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheAnalyzerGuiClass):
@@ -49,6 +49,20 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.table_found_browsers.setAlternatingRowColors(True)
         self.table_found_browsers.setToolTip("Click on a row to select a browser")
 
+        # ********** Browsers screen ********** #
+
+        #  "Table_analysis_preview"
+        self.table_analysis_preview.setColumnCount(4)
+        self.table_analysis_preview.setHorizontalHeaderLabels(['Key Hash', 'Key URL', 'Content Type', 'Creation Time'])
+        self.table_analysis_preview.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.table_analysis_preview.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.table_analysis_preview.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.table_analysis_preview.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.table_analysis_preview.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.table_analysis_preview.setToolTip("Right click for options")
+        self.table_analysis_preview.setAlternatingRowColors(True)
+        self.table_analysis_preview.setSortingEnabled(True)
+
 
 #######################
 # SECTION: ATTRIBUTES #
@@ -67,6 +81,11 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         # Current selected path to analyze and current output path
         self.current_input_path = None
         self.current_output_path = None
+        # List containing cache entries found in "chrome cache"
+        self.list_cache_entries_found = []
+
+        # Thread
+        self.chrome_analyzer_thread = None
 
 
 ##########################################
@@ -85,6 +104,8 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.button_analyze_other_path.clicked.connect(self.select_input_path)
         self.list_input_folder_preview.itemClicked.connect(self.get_file_info)
         self.button_input_folder_screen_back.clicked.connect(self.set_browsers_screen)
+        self.button_confirm_analysis.clicked.connect(self.set_analysis_screen)
+        self.button_stop_analysis.clicked.connect(self.stop_analysis)
 
 
 ###########################
@@ -184,6 +205,8 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         selection for an input folder to analyze.
         :return: nothing
         """
+
+        self.button_confirm_analysis.setEnabled(False)
 
         # Detecting clicked button
         clicked_button = self.sender().objectName()
@@ -342,6 +365,8 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                 item.clear()
             self.list_input_folder_preview.addItems(os.listdir(self.current_input_path))
 
+            self.button_confirm_analysis.setEnabled(True)
+
     def get_file_info(self):
         """Slot for "list_input_folder_preview" in "folder choice screen".
         Retrieving info about selected file from the list widget.
@@ -368,6 +393,75 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                 QtGui.QMessageBox(), "Error", "Unable to open file <br> {item}".format(item=selected_item),
                 QtGui.QMessageBox.Ok
             )
+
+
+############################
+# SECTION: ANALYSIS SCREEN #
+############################
+
+    def set_analysis_screen(self):
+        """Slot for "button_confirm_analysis" in "input folder screen".
+        "Analysis screen": stacked widget index = 3, "table_analysis_preview" with preview of results from scan.
+        :return: nothing
+        """
+
+        # "Analysis screen" settings
+        self.stackedWidget.setCurrentIndex(3)
+        self.progressBar_analysis.setValue(0)
+        self.line_input_path_analysis.setText(str(self.current_input_path.replace("/", "\\")))
+        self.button_export_to_html.setEnabled(False)
+        self.button_analysis_screen_back.setEnabled(False)
+        self.button_stop_analysis.setEnabled(True)
+        self.button_quit.setEnabled(False)
+
+        self.chrome_analyzer_thread = chrome.chrome_analyzer_thread.ChromeAnalyzerThread(
+            input_path=self.current_input_path
+        )
+        self.chrome_analyzer_thread.signal_update_table_preview.connect(self.update_table_preview)
+        self.chrome_analyzer_thread.finished.connect(self.analysis_terminated)
+        self.chrome_analyzer_thread.start()
+
+    def update_table_preview(self, idx_elem, tot_elem, key_hash, key_data, content_type, creation_time):
+        """Slot for "signal_update_table_preview" from "chrome_analyzer_thread".
+
+        :param idx_elem: position of the element in list of found cache entry instances
+        :param tot_elem: number of entries in "index" file header
+        :param key_hash: hash of the key in found cache entry
+        :param key_data: data in cache entry
+        :param content_type: content type for the data in cache entry
+        :param creation_time: cache entry creation time
+        :return: nothing
+        """
+
+        # Insert cache entry values in "table analysis preview"
+        self.table_analysis_preview.insertRow(idx_elem)
+        self.table_analysis_preview.setItem(idx_elem, 0, QtGui.QTableWidgetItem(key_hash))
+        self.table_analysis_preview.setItem(idx_elem, 1, QtGui.QTableWidgetItem(key_data))
+        self.table_analysis_preview.setItem(idx_elem, 2, QtGui.QTableWidgetItem(content_type))
+        self.table_analysis_preview.setItem(idx_elem, 3, QtGui.QTableWidgetItem(creation_time))
+        self.table_analysis_preview.scrollToBottom()
+
+        # Copying "cache_entries_list" from "chrome_analyzer_thread" to avoid rescan for html export (if any).
+        self.list_cache_entries_found = self.chrome_analyzer_thread.cache_entries_list[:]
+
+        # "ProgressBar_analysis" value
+        value = float(100 * len(self.list_cache_entries_found)) / float(tot_elem)
+        self.progressBar_analysis.setValue(value)
+
+    def stop_analysis(self):
+        """Slot for "button_stop_analysis" in "analysis screen".
+        Setting a stop signal for "chrome_analyzer_thread".
+        :return: nothing
+        """
+
+        self.chrome_analyzer_thread.signal_stop.set()
+
+    def analysis_terminated(self):
+
+        if self.progressBar_analysis.value() < 100:
+            self.progressBar_analysis.setValue(100)
+
+        print "ho finito"
 
 
 ##############################
