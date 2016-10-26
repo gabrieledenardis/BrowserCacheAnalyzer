@@ -15,15 +15,16 @@ import cache_address
 import cache_entry
 
 
-class ChromeAnalyzerThread(QtCore.QThread):
+class ChromeAnalyzerWorker(QtCore.QObject):
     """
     Analyzer for Google Chrome cache and Opera cache.
     """
 
     signal_update_table_preview = QtCore.pyqtSignal(int, int, str, str, str, str)
+    signal_finished = QtCore.pyqtSignal()
 
     def __init__(self, parent=None, input_path=None):
-        super(ChromeAnalyzerThread, self).__init__(parent)
+        super(ChromeAnalyzerWorker, self).__init__(parent)
 
         # Signal from "button_stop_analysis"
         self.signal_stop = Event()
@@ -34,7 +35,7 @@ class ChromeAnalyzerThread(QtCore.QThread):
         # List of all cache entries found
         self.cache_entries_list = []
 
-    def run(self):
+    def analyze_cache(self):
 
         # Chrome "index" file
         index_file = os.path.join(self.input_path, "index")
@@ -161,3 +162,5 @@ class ChromeAnalyzerThread(QtCore.QThread):
                             " - ",
                             cache_entry_instance.creation_time
                         )
+
+        self.signal_finished.emit()

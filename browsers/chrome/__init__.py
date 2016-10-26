@@ -1,2 +1,2 @@
 # Project imports
-import chrome_analyzer_thread
+import chrome_analyzer_worker

@@ -14,6 +14,7 @@ from gui import bca_converted_gui
 from operating_systems import windows
 from utilities import utils, browsers_utils
 from browsers import chrome
+from gui.browsers_dialogs import chrome_preview_dialog
 
 
 class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheAnalyzerGuiClass):
@@ -35,21 +36,73 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 # SECTION: APPLICATION ELEMENTS SETTINGS #
 ##########################################
 
+        # "GroupBox_system_info"
+        self.groupBox_system_info.setStyleSheet("QLineEdit { background-color: transparent }")
+        for line in self.groupBox_system_info.findChildren(QtGui.QLineEdit):
+            line.setFocusPolicy(QtCore.Qt.ClickFocus)
+            line.installEventFilter(self)
+            line.setReadOnly(True)
+            line.setFrame(False)
+
+        # "GroupBox_selected_browser_info"
+        self.groupBox_selected_browser_info.setStyleSheet("QLineEdit { background-color: transparent }")
+        for line in self.groupBox_selected_browser_info.findChildren(QtGui.QLineEdit):
+            line.setFocusPolicy(QtCore.Qt.ClickFocus)
+            line.installEventFilter(self)
+            line.setReadOnly(True)
+            line.setFrame(False)
+
         # ********** Browsers screen ********** #
 
-        # "Table_found_browsers"
-        self.table_found_browsers.setColumnCount(4)
-        self.table_found_browsers.setHorizontalHeaderLabels(['', 'Browser Name', 'Version', 'Installation Path'])
-        self.table_found_browsers.setColumnWidth(0, len("Icon") + 50)
-        self.table_found_browsers.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
-        self.table_found_browsers.horizontalHeader().setResizeMode(3, QtGui.QHeaderView.Stretch)
-        self.table_found_browsers.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.table_found_browsers.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        self.table_found_browsers.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        self.table_found_browsers.setAlternatingRowColors(True)
-        self.table_found_browsers.setToolTip("Click on a row to select a browser")
+        # "Table_installed_browsers"
+        self.table_installed_browsers.setColumnCount(4)
+        self.table_installed_browsers.setHorizontalHeaderLabels(['', 'Browser Name', 'Version', 'Installation Path'])
+        self.table_installed_browsers.setColumnWidth(0, len("Icon") + 50)
+        self.table_installed_browsers.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
+        self.table_installed_browsers.horizontalHeader().setResizeMode(3, QtGui.QHeaderView.Stretch)
+        self.table_installed_browsers.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.table_installed_browsers.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.table_installed_browsers.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.table_installed_browsers.setAlternatingRowColors(True)
+        self.table_installed_browsers.setToolTip("Click on a row to select a browser")
 
-        # ********** Browsers screen ********** #
+        # "GroupBox_install_folder_info"
+        self.groupBox_install_folder_info.setStyleSheet("color: rgb(70, 70, 70) ")
+        for line in self.groupBox_install_folder_info.findChildren(QtGui.QLineEdit):
+            line.setStyleSheet("background-color: transparent ")
+            line.setFocusPolicy(QtCore.Qt.ClickFocus)
+            line.installEventFilter(self)
+            line.setReadOnly(True)
+            line.setFrame(False)
+
+        # ********** Input folder screen ********** #
+
+        # "GroupBox_input_folder"
+        self.groupBox_input_folder.setStyleSheet("QLineEdit {background-color: transparent}")
+        for line in self.groupBox_input_folder.findChildren(QtGui.QLineEdit):
+            if "line_analysis_input_path" != line.objectName():
+                line.setFrame(False)
+            line.setFocusPolicy(QtCore.Qt.ClickFocus)
+            line.installEventFilter(self)
+            line.setReadOnly(True)
+
+        # "GroupBox_input_folder_preview"
+        self.groupBox_input_folder_preview.setStyleSheet("color: rgb(70, 70, 70)")
+        self.list_input_folder_preview.setStyleSheet("background-color: transparent")
+        self.list_input_folder_preview.setToolTip("Select a file to show info")
+        for line in self.groupBox_input_folder_preview.findChildren(QtGui.QLineEdit):
+            line.setStyleSheet("background-color: transparent")
+            line.installEventFilter(self)
+            line.setReadOnly(True)
+            line.setFrame(False)
+
+        # ********** Analysis screen ********** #
+
+        # "GroupBox_analysis_preview" 
+        self.line_input_path_analysis.setStyleSheet("background-color: transparent")
+        self.line_input_path_analysis.installEventFilter(self)
+        self.line_input_path_analysis.setReadOnly(True)
+        self.line_input_path_analysis.setFrame(False)
 
         #  "Table_analysis_preview"
         self.table_analysis_preview.setColumnCount(4)
@@ -63,6 +116,15 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.table_analysis_preview.setAlternatingRowColors(True)
         self.table_analysis_preview.setSortingEnabled(True)
 
+        # ********** Application buttons ********** #
+
+        # Application buttons
+        for item in self.findChildren(QtGui.QPushButton):
+            item.setStyleSheet(
+                "QPushButton {background-color: transparent; border: 1px solid darkgray}"
+                "QPushButton:hover {background-color: rgb(225,225,225)}"
+            )
+
 
 #######################
 # SECTION: ATTRIBUTES #
@@ -70,10 +132,10 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
         # Mouse cursor coordinates
         self.mouse_press_position = None
-        # List of found browsers in the system
-        self.list_found_browsers = []
-        # Selection from "table_found_browsers"
-        self.found_browsers_table_selection = None
+        # List of installed browsers in the system
+        self.list_installed_browsers = []
+        # Selection from "table_installed_browsers"
+        self.selection_table_installed_browsers = None
         # Matching key for selected browser
         self.matching_browser_key = None
         # Default cache path for selected browser
@@ -82,10 +144,15 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.current_input_path = None
         self.current_output_path = None
         # List containing cache entries found in "chrome cache"
-        self.list_cache_entries_found = []
+        self.list_found_cache_entries = []
+        # Clipboard to store copied values
+        self.clipboard = None
+        # QDialog for chrome advanced info on items in "table_analysis_preview"
+        self.chrome_preview_dialog = None
 
-        # Thread
+        # Threads
         self.chrome_analyzer_thread = None
+        self.chrome_analyzer_worker = None
 
 
 ##########################################
@@ -98,7 +165,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
         # Connections for other application elements
         self.button_search_browsers.clicked.connect(self.set_browsers_screen)
-        self.table_found_browsers.itemClicked.connect(self.show_installation_folder_info)
+        self.table_installed_browsers.itemClicked.connect(self.show_installation_folder_info)
         self.button_browsers_screen_select.clicked.connect(self.set_input_folder_screen)
         self.button_analyze_default_path.clicked.connect(self.select_input_path)
         self.button_analyze_other_path.clicked.connect(self.select_input_path)
@@ -106,6 +173,9 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.button_input_folder_screen_back.clicked.connect(self.set_browsers_screen)
         self.button_confirm_analysis.clicked.connect(self.set_analysis_screen)
         self.button_stop_analysis.clicked.connect(self.stop_analysis)
+        self.button_analysis_screen_back.clicked.connect(self.set_input_folder_screen)
+        self.button_quit.clicked.connect(self.close_application)
+        self.table_analysis_preview.customContextMenuRequested.connect(self.table_analysis_preview_context_menu)
 
 
 ###########################
@@ -128,7 +198,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         """Slot for "button_search_browsers" in "welcome screen" and "button_input_folder_screen_back"
         in "input folder screen" .
         "Browsers screen": stacked widget index = 1, visible "groupBox_system_info" with system values,
-        not visible "groupBox_selected_browser_info" and "table_found_browsers" containing found browsers
+        not visible "groupBox_selected_browser_info" and "table_installed_browsers" containing installed browsers
         in the system.
         :return: nothing
         """
@@ -142,7 +212,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.button_browsers_screen_select.setEnabled(False)
 
         # If back from "input folder screen"
-        self.table_found_browsers.setRowCount(0)
+        self.table_installed_browsers.setRowCount(0)
         for line in self.groupBox_install_folder_info.findChildren(QtGui.QLineEdit):
             line.clear()
 
@@ -155,12 +225,12 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         # Searching for browsers (depending on OS)
         # Microsoft Windows
         if "windows" in platform.system().lower():
-            self.list_found_browsers = windows.browsers_finder.finder()
+            self.list_installed_browsers = windows.browsers_finder.finder()
         # TODO: Code for other OSs
 
-        # "Table_found_browsers"
-        for idx, brw in enumerate(self.list_found_browsers):
-            self.table_found_browsers.insertRow(idx)
+        # "Table_installed_browsers"
+        for idx, brw in enumerate(self.list_installed_browsers):
+            self.table_installed_browsers.insertRow(idx)
 
             # Browser values
             icon_name = brw[0]
@@ -168,24 +238,24 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             version = brw[2]
             browser_inst_path = brw[3]
 
-            self.table_found_browsers.setCellWidget(idx, 0, BrowserIconWidget(icon_name=icon_name))
-            self.table_found_browsers.setItem(idx, 1, QtGui.QTableWidgetItem(browser_name))
-            self.table_found_browsers.setItem(idx, 2, QtGui.QTableWidgetItem(version))
-            self.table_found_browsers.setItem(idx, 3, QtGui.QTableWidgetItem(browser_inst_path))
+            self.table_installed_browsers.setCellWidget(idx, 0, BrowserIconWidget(icon_name=icon_name))
+            self.table_installed_browsers.setItem(idx, 1, QtGui.QTableWidgetItem(browser_name))
+            self.table_installed_browsers.setItem(idx, 2, QtGui.QTableWidgetItem(version))
+            self.table_installed_browsers.setItem(idx, 3, QtGui.QTableWidgetItem(browser_inst_path))
 
     def show_installation_folder_info(self):
-        """Slot for selection on "found_browsers_table".
+        """Slot for selection on "table_installed_browsers".
         Showing installation folder info for selected browser and enabling "button_browsers_screen_select".
         :return: nothing
         """
 
         # Getting selection from table and enabling button
-        self.found_browsers_table_selection = self.table_found_browsers.selectedItems()
-        if self.found_browsers_table_selection:
+        self.selection_table_installed_browsers = self.table_installed_browsers.selectedItems()
+        if self.selection_table_installed_browsers:
             self.button_browsers_screen_select.setEnabled(True)
 
         # Installation folder info for selected browser
-        folder_path = str(self.found_browsers_table_selection[2].text())
+        folder_path = str(self.selection_table_installed_browsers[2].text())
         folder_info = utils.get_folder_info(folder_path=folder_path)
 
         self.line_inst_folder_dimension.setText(str(folder_info['folder_dimension']))
@@ -206,17 +276,18 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         :return: nothing
         """
 
-        self.button_confirm_analysis.setEnabled(False)
-
         # Detecting clicked button
         clicked_button = self.sender().objectName()
 
         # "Button_browsers_screen_select" button in "browser screen"
         if clicked_button == "button_browsers_screen_select":
+
+            self.button_confirm_analysis.setEnabled(False)
+
             # Values for selection from table
-            browser_name = self.found_browsers_table_selection[0].text()
-            browser_version = self.found_browsers_table_selection[1].text()
-            browser_install_path = self.found_browsers_table_selection[2].text()
+            browser_name = self.selection_table_installed_browsers[0].text()
+            browser_version = self.selection_table_installed_browsers[1].text()
+            browser_install_path = self.selection_table_installed_browsers[2].text()
 
             # Matching key for selected browser
             browser_info_path = browsers_utils.get_default_cache_path(browser_name=browser_name)
@@ -287,6 +358,12 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                 # Mark for default path
                 mark_icon = QtGui.QPixmap(mark_path)
                 self.label_browser_mark_path.setPixmap(mark_icon)
+        # "Button_analysis_screen_back" button in "analysis screen"
+        elif clicked_button == "button_analysis_screen_back":
+
+            # Input screen settings"
+            self.stackedWidget.setCurrentIndex(2)
+            self.groupBox_selected_browser_info.setVisible(True)
 
     def select_input_path(self):
         """Slot for "button_analyze_default_path" and "button_analyze_other_path".
@@ -332,7 +409,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                 # Path is selected but not correct
                 if dialog_input_path:
                     # Browser name from table
-                    browser = self.found_browsers_table_selection[0].text()
+                    browser = self.selection_table_installed_browsers[0].text()
 
                     QtGui.QMessageBox.warning(
                         QtGui.QMessageBox(), "Wrong input path",
@@ -405,25 +482,38 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         :return: nothing
         """
 
-        # "Analysis screen" settings
         self.stackedWidget.setCurrentIndex(3)
-        self.progressBar_analysis.setValue(0)
+
+        # Already visited "analysis screen"
+        self.progressBar_analysis.reset()
+        self.table_analysis_preview.setRowCount(0)
+
         self.line_input_path_analysis.setText(str(self.current_input_path.replace("/", "\\")))
         self.button_export_to_html.setEnabled(False)
         self.button_analysis_screen_back.setEnabled(False)
         self.button_stop_analysis.setEnabled(True)
         self.button_quit.setEnabled(False)
 
-        self.chrome_analyzer_thread = chrome.chrome_analyzer_thread.ChromeAnalyzerThread(
+        # Clipboard to store copied values from "table_analysis_preview"
+        self.clipboard = QtGui.QApplication.clipboard()
+
+        # Analyzer thread and worker
+        self.chrome_analyzer_thread = QtCore.QThread()
+        self.chrome_analyzer_worker = chrome.chrome_analyzer_worker.ChromeAnalyzerWorker(
             input_path=self.current_input_path
         )
-        self.chrome_analyzer_thread.signal_update_table_preview.connect(self.update_table_preview)
+        self.chrome_analyzer_worker.moveToThread(self.chrome_analyzer_thread)
+
+        # Analyzer thread and worker signals connections
+        self.chrome_analyzer_thread.started.connect(self.chrome_analyzer_worker.analyze_cache)
+        self.chrome_analyzer_worker.signal_finished.connect(self.chrome_analyzer_thread.quit)
         self.chrome_analyzer_thread.finished.connect(self.analysis_terminated)
+        self.chrome_analyzer_worker.signal_update_table_preview.connect(self.update_table_preview)
         self.chrome_analyzer_thread.start()
 
     def update_table_preview(self, idx_elem, tot_elem, key_hash, key_data, content_type, creation_time):
-        """Slot for "signal_update_table_preview" from "chrome_analyzer_thread".
-
+        """Slot for "signal_update_table_preview" from "chrome_analyzer_worker".
+        Updating table with results from "chroma_analyzer_worker"
         :param idx_elem: position of the element in list of found cache entry instances
         :param tot_elem: number of entries in "index" file header
         :param key_hash: hash of the key in found cache entry
@@ -433,7 +523,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         :return: nothing
         """
 
-        # Insert cache entry values in "table analysis preview"
+        # Cache entry values in "table analysis preview"
         self.table_analysis_preview.insertRow(idx_elem)
         self.table_analysis_preview.setItem(idx_elem, 0, QtGui.QTableWidgetItem(key_hash))
         self.table_analysis_preview.setItem(idx_elem, 1, QtGui.QTableWidgetItem(key_data))
@@ -441,12 +531,45 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.table_analysis_preview.setItem(idx_elem, 3, QtGui.QTableWidgetItem(creation_time))
         self.table_analysis_preview.scrollToBottom()
 
-        # Copying "cache_entries_list" from "chrome_analyzer_thread" to avoid rescan for html export (if any).
-        self.list_cache_entries_found = self.chrome_analyzer_thread.cache_entries_list[:]
+        # Copying "cache_entries_list" from "chrome_analyzer_thread" to avoid rescan for html export (if any)
+        self.list_found_cache_entries = self.chrome_analyzer_worker.cache_entries_list[:]
 
         # "ProgressBar_analysis" value
-        value = float(100 * len(self.list_cache_entries_found)) / float(tot_elem)
+        value = float(100 * len(self.list_found_cache_entries)) / float(tot_elem)
         self.progressBar_analysis.setValue(value)
+
+    def table_analysis_preview_context_menu(self, position):
+        """Slot for "customContextMenuRequested" on "table_analysis_preview".
+        Right mouse click on table to open a context menu for advanced options.
+        :param position: event position on the "table_analysis_preview
+        :return:
+        """
+
+        # Context menu
+        menu = QtGui.QMenu()
+        action_copy_to_clipboard = menu.addAction("Copy item to clipboard")
+        action_advanced_results = menu.addAction("Show advanced results")
+        action = menu.exec_(self.table_analysis_preview.mapToGlobal(position))
+
+        # Copy element
+        if action == action_copy_to_clipboard:
+            selection = self.table_analysis_preview.currentItem().text()
+            self.clipboard.clear()
+            self.clipboard.setText(selection)
+            QtGui.QMessageBox.information(
+                QtGui.QMessageBox(), "Clipboard",
+                "{selection}\n\nElement copied to clipboard".format(selection=selection),
+                QtGui.QMessageBox.Ok
+            )
+        if action == action_advanced_results:
+            # Retrieving selected item from "table_analysis_preview"
+            # Position in results list = table row
+            current_table_row = self.table_analysis_preview.currentRow()
+            current_result_item = self.list_found_cache_entries[current_table_row]
+
+            # File preview
+            self.chrome_preview_dialog = chrome_preview_dialog.ChromePreviewDialog(item=current_result_item)
+            self.chrome_preview_dialog.exec_()
 
     def stop_analysis(self):
         """Slot for "button_stop_analysis" in "analysis screen".
@@ -454,14 +577,42 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         :return: nothing
         """
 
-        self.chrome_analyzer_thread.signal_stop.set()
+        self.chrome_analyzer_worker.signal_stop.set()
 
     def analysis_terminated(self):
+        """Slot for signal "finished" from "chrome_analyzer_thread".
+        A message box will confirm if analysis normally terminated or stopped by user.
+        :return: nothing
+        """
 
-        if self.progressBar_analysis.value() < 100:
-            self.progressBar_analysis.setValue(100)
+        # Browser name from selection in "table_installed_browsers"
+        browser_name = self.selection_table_installed_browsers[0].text()
 
-        print "ho finito"
+        # Analysis stopped by user
+        if self.chrome_analyzer_worker.stopped_by_user:
+            QtGui.QMessageBox.warning(
+                QtGui.QMessageBox(), "Analysis stopped",
+                "Analysis for {browser} stopped by user".format(browser=browser_name),
+                QtGui.QMessageBox.Ok
+            )
+
+            # "Analysis screen" buttons settings
+            self.button_analysis_screen_back.setEnabled(True)
+            self.button_stop_analysis.setEnabled(False)
+            self.button_quit.setEnabled(True)
+        # Analysis normal termination
+        else:
+            QtGui.QMessageBox.information(
+                QtGui.QMessageBox(), "Analysis terminated",
+                "Analysis for {browser} successfully terminated".format(browser=browser_name),
+                QtGui.QMessageBox.Ok
+            )
+
+            # "Analysis screen" buttons settings
+            self.button_analysis_screen_back.setEnabled(True)
+            self.button_stop_analysis.setEnabled(False)
+            self.button_export_to_html.setEnabled(True)
+            self.button_quit.setEnabled(True)
 
 
 ##############################
@@ -470,19 +621,35 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
     def close_application(self):
         """Slot for "button_close_application".
-        A message box will ask to confirm before quitting.
+        A message box will ask to confirm before quitting normally or during an analysis or export.
         :return: nothing
         """
 
-        # Confirmation before quitting
-        msg_confirm_exit = QtGui.QMessageBox.question(
-            QtGui.QMessageBox(), "Confirm", "Are you sure you want to quit?",
-            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-            QtGui.QMessageBox.No)
+        # Analysis is still running
+        if self.chrome_analyzer_thread and self.chrome_analyzer_thread.isRunning():
+            browser_name = self.selection_table_installed_browsers[0].text()
 
-        # Quitting application
-        if msg_confirm_exit == QtGui.QMessageBox.Yes:
-            self.close()
+            # Asking for closing on running analysis
+            msg_quit_analysis = QtGui.QMessageBox.question(
+                QtGui.QMessageBox(), "Analysis running",
+                "Analysis for {browser} is still running. Quit?".format(browser=browser_name),
+                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No
+            )
+
+            # Quitting application
+            if msg_quit_analysis == QtGui.QMessageBox.Yes:
+                self.deleteLater()
+        # Analysis is terminated or stopped by user
+        else:
+            # Normal confirmation before quitting
+            msg_confirm_exit = QtGui.QMessageBox.question(
+                QtGui.QMessageBox(), "Confirm", "Are you sure you want to quit?",
+                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                QtGui.QMessageBox.No)
+
+            # Quitting application
+            if msg_confirm_exit == QtGui.QMessageBox.Yes:
+                self.deleteLater()
 
 
 ######################################################################
@@ -512,16 +679,16 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             self.move(event.globalPos() - self.mouse_press_position)
 
 
-###########################################################################
-# SECTION: BROWSER ICON WIDGET (Browsers icons in "table found browsers") #
-###########################################################################
+###############################################################################
+# SECTION: BROWSER ICON WIDGET (Browsers icons in "table_installed_browsers") #
+###############################################################################
 
 class BrowserIconWidget(QtGui.QLabel):
     """
-    Selection for browser icon in "table found browsers".
-    Setting a Browser Icon Widget for the first column of "table found browsers", selecting the right icon according
-    to the browser name.
-    :param icon_name: browser name from "found browser list"
+    Selection for browser icon in "table_installed_browsers".
+    Setting a Browser Icon Widget for the first column of "table-installed_browsers", selecting the right icon
+    according to the browser name.
+    :param icon_name: browser name from "list_installed_browsers"
     """
 
     def __init__(self, parent=None, icon_name=None):
