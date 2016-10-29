@@ -1,2 +1,3 @@
 # Project imports
-import chrome_analyzer_worker
+import chrome_analyzer
+import chrome_exporter

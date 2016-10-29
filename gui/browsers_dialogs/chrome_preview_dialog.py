@@ -16,6 +16,29 @@ class ChromePreviewDialog(QtGui.QDialog, cpd_converted_gui.Ui_ChromePreviewDialo
         # Setting up the application user interface from python converted gui
         self.setupUi(self)
 
+
+##########################################
+# SECTION: APPLICATION ELEMENTS SETTINGS #
+##########################################
+
+        # QDialog and buttons
+        self.setStyleSheet("background-color: rgb(225,225,225) ")
+        self.label_dialog_title.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+        for button in self.findChildren(QtGui.QPushButton):
+            button.setStyleSheet("QPushButton {background-color: transparent; border: 1px solid darkgray}"
+                                 "QPushButton:hover {background-color: rgb(192,192,192)}")
+
+        # Lines edit
+        for line in self.findChildren(QtGui.QLineEdit):
+            line.installEventFilter(self)
+            line.setReadOnly(True)
+            line.setFrame(False)
+
+
+#######################
+# SECTION: ATTRIBUTES #
+#######################
+
         # Values for selected item
         self.label_dialog_title.setText(str(item.key_hash))
         self.line_key_hash.setText(str(item.key_hash))

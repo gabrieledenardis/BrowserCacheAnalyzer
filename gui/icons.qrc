@@ -11,5 +11,7 @@
     <file>icons/stop.png</file>
     <file>icons/html.png</file>
     <file>icons/button_power.png</file>
+    <file>icons/home.png</file>
+    <file>icons/open_folder.png</file>
 </qresource>
 </RCC>

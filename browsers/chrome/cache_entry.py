@@ -80,6 +80,7 @@ class CacheEntry(object):
                                 resource_size=self.data_stream_sizes[s_address],
                                 is_http_header=True
                             )
+
                         # Not HTTP Response Header
                         else:
                             self.cache_resource_instance = cache_resource.CacheResource(

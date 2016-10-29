@@ -8,6 +8,9 @@ from PyQt4 import QtCore
 # Python imports
 import platform
 import os
+import datetime
+import time
+import shutil
 
 # Project imports
 from gui import bca_converted_gui
@@ -66,15 +69,6 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.table_installed_browsers.setAlternatingRowColors(True)
         self.table_installed_browsers.setToolTip("Click on a row to select a browser")
 
-        # "GroupBox_install_folder_info"
-        self.groupBox_install_folder_info.setStyleSheet("color: rgb(70, 70, 70) ")
-        for line in self.groupBox_install_folder_info.findChildren(QtGui.QLineEdit):
-            line.setStyleSheet("background-color: transparent ")
-            line.setFocusPolicy(QtCore.Qt.ClickFocus)
-            line.installEventFilter(self)
-            line.setReadOnly(True)
-            line.setFrame(False)
-
         # ********** Input folder screen ********** #
 
         # "GroupBox_input_folder"
@@ -116,6 +110,14 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.table_analysis_preview.setAlternatingRowColors(True)
         self.table_analysis_preview.setSortingEnabled(True)
 
+        # ********** Exporting screen ********** #
+
+        # "GroupBox_export"
+        for line in self.groupBox_export.findChildren(QtGui.QLineEdit):
+            line.setStyleSheet("background-color: transparent")
+            line.setReadOnly(True)
+            line.setFrame(False)
+
         # ********** Application buttons ********** #
 
         # Application buttons
@@ -140,9 +142,9 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.matching_browser_key = None
         # Default cache path for selected browser
         self.default_cache_path = None
-        # Current selected path to analyze and current output path
+        # Current selected path to analyze and current export path
         self.current_input_path = None
-        self.current_output_path = None
+        self.current_export_path = None
         # List containing cache entries found in "chrome cache"
         self.list_found_cache_entries = []
         # Clipboard to store copied values
@@ -153,6 +155,8 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         # Threads
         self.chrome_analyzer_thread = None
         self.chrome_analyzer_worker = None
+        self.chrome_exporter_thread = None
+        self.chrome_exporter_worker = None
 
 
 ##########################################
@@ -165,7 +169,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
         # Connections for other application elements
         self.button_search_browsers.clicked.connect(self.set_browsers_screen)
-        self.table_installed_browsers.itemClicked.connect(self.show_installation_folder_info)
+        self.table_installed_browsers.itemClicked.connect(self.enable_button_browsers_screen)
         self.button_browsers_screen_select.clicked.connect(self.set_input_folder_screen)
         self.button_analyze_default_path.clicked.connect(self.select_input_path)
         self.button_analyze_other_path.clicked.connect(self.select_input_path)
@@ -174,8 +178,13 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.button_confirm_analysis.clicked.connect(self.set_analysis_screen)
         self.button_stop_analysis.clicked.connect(self.stop_analysis)
         self.button_analysis_screen_back.clicked.connect(self.set_input_folder_screen)
-        self.button_quit.clicked.connect(self.close_application)
+        self.button_quit_analysis_screen.clicked.connect(self.close_application)
         self.table_analysis_preview.customContextMenuRequested.connect(self.table_analysis_preview_context_menu)
+        self.button_export_to_html.clicked.connect(self.export_to_html)
+        self.button_show_folder.clicked.connect(self.show_export_folder)
+        self.button_stop_export.clicked.connect(self.stop_export)
+        self.button_quit_export_screen.clicked.connect(self.close_application)
+        self.button_home.clicked.connect(self.set_browsers_screen)
 
 
 ###########################
@@ -213,8 +222,6 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
         # If back from "input folder screen"
         self.table_installed_browsers.setRowCount(0)
-        for line in self.groupBox_install_folder_info.findChildren(QtGui.QLineEdit):
-            line.clear()
 
         # System values
         self.line_system_os_name.setText(platform.system())
@@ -243,9 +250,9 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             self.table_installed_browsers.setItem(idx, 2, QtGui.QTableWidgetItem(version))
             self.table_installed_browsers.setItem(idx, 3, QtGui.QTableWidgetItem(browser_inst_path))
 
-    def show_installation_folder_info(self):
+    def enable_button_browsers_screen(self):
         """Slot for selection on "table_installed_browsers".
-        Showing installation folder info for selected browser and enabling "button_browsers_screen_select".
+        Enabling "button_browsers_screen_select".
         :return: nothing
         """
 
@@ -253,16 +260,6 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.selection_table_installed_browsers = self.table_installed_browsers.selectedItems()
         if self.selection_table_installed_browsers:
             self.button_browsers_screen_select.setEnabled(True)
-
-        # Installation folder info for selected browser
-        folder_path = str(self.selection_table_installed_browsers[2].text())
-        folder_info = utils.get_folder_info(folder_path=folder_path)
-
-        self.line_inst_folder_dimension.setText(str(folder_info['folder_dimension']))
-        self.line_inst_folder_elements.setText(str(folder_info['folder_elements']))
-        self.line_inst_folder_creation_time.setText(str(folder_info['folder_creation_time']))
-        self.line_inst_folder_modified_time.setText(str(folder_info['folder_last_modified_time']))
-        self.line_inst_folder_access_time.setText(str(folder_info['folder_last_access_time']))
 
 
 ################################
@@ -492,23 +489,25 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.button_export_to_html.setEnabled(False)
         self.button_analysis_screen_back.setEnabled(False)
         self.button_stop_analysis.setEnabled(True)
-        self.button_quit.setEnabled(False)
+        self.button_quit_analysis_screen.setEnabled(False)
 
         # Clipboard to store copied values from "table_analysis_preview"
         self.clipboard = QtGui.QApplication.clipboard()
 
         # Analyzer thread and worker
         self.chrome_analyzer_thread = QtCore.QThread()
-        self.chrome_analyzer_worker = chrome.chrome_analyzer_worker.ChromeAnalyzerWorker(
-            input_path=self.current_input_path
-        )
+        self.chrome_analyzer_worker = chrome.chrome_analyzer.ChromeAnalyzer(input_path=self.current_input_path)
         self.chrome_analyzer_worker.moveToThread(self.chrome_analyzer_thread)
 
         # Analyzer thread and worker signals connections
         self.chrome_analyzer_thread.started.connect(self.chrome_analyzer_worker.analyze_cache)
         self.chrome_analyzer_worker.signal_finished.connect(self.chrome_analyzer_thread.quit)
+        self.chrome_analyzer_worker.signal_finished.connect(self.chrome_analyzer_worker.deleteLater)
+        self.chrome_analyzer_thread.finished.connect(self.chrome_analyzer_thread.deleteLater)
+
         self.chrome_analyzer_thread.finished.connect(self.analysis_terminated)
         self.chrome_analyzer_worker.signal_update_table_preview.connect(self.update_table_preview)
+
         self.chrome_analyzer_thread.start()
 
     def update_table_preview(self, idx_elem, tot_elem, key_hash, key_data, content_type, creation_time):
@@ -532,7 +531,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.table_analysis_preview.scrollToBottom()
 
         # Copying "cache_entries_list" from "chrome_analyzer_thread" to avoid rescan for html export (if any)
-        self.list_found_cache_entries = self.chrome_analyzer_worker.cache_entries_list[:]
+        self.list_found_cache_entries = self.chrome_analyzer_worker.list_cache_entries[:]
 
         # "ProgressBar_analysis" value
         value = float(100 * len(self.list_found_cache_entries)) / float(tot_elem)
@@ -573,7 +572,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
     def stop_analysis(self):
         """Slot for "button_stop_analysis" in "analysis screen".
-        Setting a stop signal for "chrome_analyzer_thread".
+        Setting a stop signal for "chrome_analyzer_worker".
         :return: nothing
         """
 
@@ -599,7 +598,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             # "Analysis screen" buttons settings
             self.button_analysis_screen_back.setEnabled(True)
             self.button_stop_analysis.setEnabled(False)
-            self.button_quit.setEnabled(True)
+            self.button_quit_analysis_screen.setEnabled(True)
         # Analysis normal termination
         else:
             QtGui.QMessageBox.information(
@@ -612,7 +611,163 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             self.button_analysis_screen_back.setEnabled(True)
             self.button_stop_analysis.setEnabled(False)
             self.button_export_to_html.setEnabled(True)
-            self.button_quit.setEnabled(True)
+            self.button_quit_analysis_screen.setEnabled(True)
+
+
+###########################
+# SECTION: EXPORT TO HTML #
+###########################
+
+    def export_to_html(self):
+        """Slot for button_export_to_html" in analysis screen.
+        Export screen = stacked widget index = 4 and showing progress of exporting.
+        :return: nothing
+        """
+
+        # Output path for export
+        dialog_output_path = QtGui.QFileDialog().getExistingDirectory(
+            self, "Select an output folder for export",
+            os.path.join("C:", os.sep, "Users", unicode(os.environ['USERNAME']), "Desktop"),
+            QtGui.QFileDialog.ShowDirsOnly
+        )
+
+        # Convert QString from QDialog to unicode
+        self.current_export_path = unicode(dialog_output_path)
+
+        # Selected output path for export
+        if self.current_export_path:
+
+            self.stackedWidget.setCurrentIndex(4)
+
+            # Export screen settings
+            self.button_home.setEnabled(False)
+            self.button_show_folder.setEnabled(False)
+            self.button_quit_export_screen.setEnabled(False)
+            self.button_stop_export.setEnabled(True)
+            self.progressBar_export.reset()
+
+            current_datetime = datetime.datetime.now().strftime("%d-%b-%Y-%H_%M_%S")
+            export_folder_name = "BrowserCacheAnalyzer-Export[{date}]".format(date=current_datetime)
+            self.export_folder_path = os.path.join(self.current_export_path, export_folder_name)
+
+            # Creating export main folder
+            try:
+                os.makedirs(self.export_folder_path)
+            except:
+                QtGui.QMessageBox.warning(
+                    QtGui.QMessageBox(), "Export folder",
+                    "Unable to create \n{folder}".format(folder=self.export_folder_path),
+                    QtGui.QMessageBox.Ok
+                )
+
+            self.line_input_path_export.setText(str(self.current_input_path))
+            self.line_output_path_export.setText(str(self.export_folder_path))
+
+            # Generating random MD5 and SHA1 for the export
+            export_md5 = utils.get_random_hash()['random_md5']
+            export_sha1 = utils.get_random_hash()['random_sha1']
+
+            # Analyzer thread and worker
+            self.chrome_exporter_thread = QtCore.QThread()
+            self.chrome_exporter_worker = chrome.chrome_exporter.ChromeExporter(
+                input_path=self.current_input_path,
+                export_path=self.current_export_path,
+                export_folder_name=export_folder_name,
+                entries_to_export=self.list_found_cache_entries,
+                browser_info=self.selection_table_installed_browsers,
+                browser_def_path=self.default_cache_path,
+                export_md5=export_md5,
+                export_sha1=export_sha1
+            )
+
+            self.chrome_exporter_worker.moveToThread(self.chrome_exporter_thread)
+
+            # Analyzer thread and worker signals connections
+            self.chrome_exporter_thread.started.connect(self.chrome_exporter_worker.exporter)
+            self.chrome_exporter_worker.signal_finished.connect(self.chrome_exporter_thread.quit)
+            self.chrome_exporter_worker.signal_finished.connect(self.chrome_exporter_worker.deleteLater)
+            self.chrome_exporter_thread.finished.connect(self.chrome_exporter_thread.deleteLater)
+            self.chrome_exporter_worker.signal_update_export.connect(self.update_export_progress)
+            self.chrome_exporter_thread.finished.connect(self.export_terminated)
+            self.chrome_exporter_thread.start()
+
+        # Not selected output path for export
+        else:
+            QtGui.QMessageBox.information(
+                QtGui.QMessageBox(), "No selected folder",
+                "Seems you did not select an output folder. <br> Please selected one", QtGui.QMessageBox.Ok
+            )
+
+    def update_export_progress(self, exported_entries=None, tot_entries=None):
+        """Slot for "signal_update_export" in "chrome_exporter_worker".
+        Updating export progress.
+        :param exported_entries: entries exported
+        :param tot_entries: total extries to export
+        :return: nothing
+        """
+
+        value = float(100 * exported_entries) / float(tot_entries)
+        self.progressBar_export.setValue(value)
+
+    def stop_export(self):
+        """Slot for "button_stop_export" in "export screen".
+        Setting a stop signal for "chrome_exporter_worker".
+        :return: nothing
+        """
+
+        self.chrome_exporter_worker.signal_stop.set()
+
+    def export_terminated(self):
+        """Slot for signal "finished" from "chrome_exporter_thread".
+        A message box will confirm if export normally terminated or stopped by user.
+        :return: nothing
+        """
+
+        # Browser name from selection in "table_installed_browsers"
+        browser_name = self.selection_table_installed_browsers[0].text()
+
+        # Analysis stopped by user
+        if self.chrome_exporter_worker.stopped_by_user:
+            QtGui.QMessageBox.warning(
+                QtGui.QMessageBox(), "Export stopped",
+                "Export for {browser} stopped by user".format(browser=browser_name),
+                QtGui.QMessageBox.Ok
+            )
+
+            # Deleting export folder
+            shutil.rmtree(self.export_folder_path, ignore_errors=True)
+            QtGui.QMessageBox.information(
+                QtGui.QMessageBox(), "Deleted folder",
+                "{folder} Deleted after stop export".format(folder=self.export_folder_path),
+                QtGui.QMessageBox.Ok
+            )
+
+            # "Export screen" buttons settings
+            self.button_home.setEnabled(True)
+            self.button_stop_export.setEnabled(False)
+            self.button_quit_export_screen.setEnabled(True)
+
+        # Export normal termination
+        else:
+            QtGui.QMessageBox.information(
+                QtGui.QMessageBox(), "Export terminated",
+                "Export for {browser} successfully terminated".format(browser=browser_name),
+                QtGui.QMessageBox.Ok
+            )
+
+            # "Export screen" buttons settings
+            self.button_home.setEnabled(True)
+            self.button_stop_export.setEnabled(False)
+            self.button_quit_export_screen.setEnabled(True)
+            self.button_show_folder.setEnabled(True)
+
+    def show_export_folder(self):
+        """Slot for "button_show_folder" in export screen.
+        Opening export folder after export termination.
+        :return: nothing
+        """
+
+        os.startfile(self.export_folder_path)
 
 
 ##############################
@@ -626,11 +781,11 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         """
 
         # Analysis is still running
-        if self.chrome_analyzer_thread and self.chrome_analyzer_thread.isRunning():
+        if self.chrome_analyzer_worker and self.chrome_analyzer_worker.worker_is_running:
             browser_name = self.selection_table_installed_browsers[0].text()
 
             # Asking for closing on running analysis
-            msg_quit_analysis = QtGui.QMessageBox.question(
+            msg_quit_analysis = QtGui.QMessageBox.warning(
                 QtGui.QMessageBox(), "Analysis running",
                 "Analysis for {browser} is still running. Quit?".format(browser=browser_name),
                 QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No
@@ -639,9 +794,25 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             # Quitting application
             if msg_quit_analysis == QtGui.QMessageBox.Yes:
                 self.deleteLater()
-        # Analysis is terminated or stopped by user
+
+        # Export is still running
+        elif self.chrome_exporter_worker and self.chrome_exporter_worker.worker_is_running:
+            browser_name = self.selection_table_installed_browsers[0].text()
+
+            # Asking for closing on running export
+            msg_quit_export = QtGui.QMessageBox.warning(
+                QtGui.QMessageBox(), "Export running",
+                "Export for {browser} is still running. Quit?".format(browser=browser_name),
+                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No
+            )
+
+            # Quitting application
+            if msg_quit_export == QtGui.QMessageBox.Yes:
+                self.deleteLater()
+
+        # Analysis or export terminated or stopped by user
         else:
-            # Normal confirmation before quitting
+            # Confirmation before quitting
             msg_confirm_exit = QtGui.QMessageBox.question(
                 QtGui.QMessageBox(), "Confirm", "Are you sure you want to quit?",
                 QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,

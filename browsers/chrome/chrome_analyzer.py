@@ -15,25 +15,27 @@ import cache_address
 import cache_entry
 
 
-class ChromeAnalyzerWorker(QtCore.QObject):
+class ChromeAnalyzer(QtCore.QObject):
     """
-    Analyzer for Google Chrome cache and Opera cache.
+    Analyzer for Google Chrome cache.
     """
 
     signal_update_table_preview = QtCore.pyqtSignal(int, int, str, str, str, str)
     signal_finished = QtCore.pyqtSignal()
 
     def __init__(self, parent=None, input_path=None):
-        super(ChromeAnalyzerWorker, self).__init__(parent)
+        super(ChromeAnalyzer, self).__init__(parent)
 
         # Signal from "button_stop_analysis"
         self.signal_stop = Event()
         # Thread stopped by user
         self.stopped_by_user = False
+        # Analysis running
+        self.worker_is_running = False
         # Input path to analyze
         self.input_path = input_path
         # List of all cache entries found
-        self.cache_entries_list = []
+        self.list_cache_entries = []
 
     def analyze_cache(self):
 
@@ -52,9 +54,12 @@ class ChromeAnalyzerWorker(QtCore.QObject):
             f_index.seek(index_header_dimension)
 
             for addresses in range(table_size):
+                # Analysis is running
+                self.worker_is_running = True
                 # "Button_stop_analysis" clicked
                 if self.signal_stop.is_set():
                     self.stopped_by_user = True
+                    self.worker_is_running = False
                     break
 
                 # Binary address (32 bits)
@@ -84,7 +89,7 @@ class ChromeAnalyzerWorker(QtCore.QObject):
 
                             if "Content-Type" in cache_entry_instance.data_stream_addresses[0].resource_data:
                                 self.signal_update_table_preview.emit(
-                                    len(self.cache_entries_list) - 1,
+                                    len(self.list_cache_entries) - 1,
                                     num_entries,
                                     str(cache_entry_instance.key_hash),
                                     cache_entry_instance.key_data,
@@ -93,7 +98,7 @@ class ChromeAnalyzerWorker(QtCore.QObject):
                                 )
                             else:
                                 self.signal_update_table_preview.emit(
-                                    len(self.cache_entries_list)-1,
+                                    len(self.list_cache_entries)-1,
                                     num_entries,
                                     str(cache_entry_instance.key_hash),
                                     cache_entry_instance.key_data,
@@ -102,7 +107,7 @@ class ChromeAnalyzerWorker(QtCore.QObject):
                                 )
                         else:
                             self.signal_update_table_preview.emit(
-                                len(self.cache_entries_list)-1,
+                                len(self.list_cache_entries)-1,
                                 num_entries,
                                 str(cache_entry_instance.key_hash),
                                 cache_entry_instance.key_data,
@@ -110,8 +115,7 @@ class ChromeAnalyzerWorker(QtCore.QObject):
                                 cache_entry_instance.creation_time
                             )
 
-                        # Adds cache entry to cache entries list
-                        self.cache_entries_list.append(cache_entry_instance)
+                        self.list_cache_entries.append(cache_entry_instance)
 
                         # Next entry address (from current entry)
                         bin_next_entry_address = format(cache_entry_instance.next_entry_address, "032b")
@@ -129,15 +133,14 @@ class ChromeAnalyzerWorker(QtCore.QObject):
                             block_number=cache_next_file_instance.block_number
                         )
 
-                    # Adding cache entry to cache entries list
-                    self.cache_entries_list.append(cache_entry_instance)
+                    self.list_cache_entries.append(cache_entry_instance)
 
                     if (cache_entry_instance.data_stream_addresses[0] and
                             isinstance(cache_entry_instance.data_stream_addresses[0].resource_data, dict)):
 
                             if "Content-Type" in cache_entry_instance.data_stream_addresses[0].resource_data:
                                 self.signal_update_table_preview.emit(
-                                    len(self.cache_entries_list)-1,
+                                    len(self.list_cache_entries)-1,
                                     num_entries,
                                     str(cache_entry_instance.key_hash),
                                     cache_entry_instance.key_data,
@@ -146,7 +149,7 @@ class ChromeAnalyzerWorker(QtCore.QObject):
                                 )
                             else:
                                 self.signal_update_table_preview.emit(
-                                    len(self.cache_entries_list)-1,
+                                    len(self.list_cache_entries)-1,
                                     num_entries,
                                     str(cache_entry_instance.key_hash),
                                     cache_entry_instance.key_data,
@@ -155,12 +158,12 @@ class ChromeAnalyzerWorker(QtCore.QObject):
                                 )
                     else:
                         self.signal_update_table_preview.emit(
-                            len(self.cache_entries_list)-1,
+                            len(self.list_cache_entries)-1,
                             num_entries,
                             str(cache_entry_instance.key_hash),
                             cache_entry_instance.key_data,
                             " - ",
                             cache_entry_instance.creation_time
                         )
-
+        self.worker_is_running = False
         self.signal_finished.emit()

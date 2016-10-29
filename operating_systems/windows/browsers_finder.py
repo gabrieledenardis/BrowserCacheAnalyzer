@@ -10,11 +10,14 @@ except ImportError:
 # Project imports
 from utilities import browsers_utils, utils
 
+# Uninstall registry key (For user installed browsers)
+UNINSTALL_KEY = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+
 
 def finder():
     """ Looking in system registry for installed browsers.
     For user installed browsers, if values in "USER_INSTALLED_BROWSERS" are also in "uninstall" key in system registry,
-    retrieving values and adding in "found browsers".
+    retrieving values and adding in "list_found browsers".
     :return: found_browsers (list of found browsers in the system).
     """
 
@@ -25,15 +28,16 @@ def finder():
     browser_name = None
     browser_version = None
     browser_path = None
+    browser_inst_date = None
 
     # List of found browsers in the system
-    found_browsers = []
+    list_found_browsers = []
 
     try:
         # Opening uninstall key
         uninstall_key = _winreg.OpenKey(
             _winreg.HKEY_LOCAL_MACHINE,
-            utils.UNINSTALL_KEY,
+            UNINSTALL_KEY,
             0,
             _winreg.KEY_READ
         )
@@ -47,7 +51,7 @@ def finder():
                     # A browser in "user installed browsers" matches a sub key name
                     if browser in uninstall_sub_key_name.lower():
                         # Matching browser key name
-                        browser_key_name = "\\".join([utils.UNINSTALL_KEY, uninstall_sub_key_name])
+                        browser_key_name = "\\".join([UNINSTALL_KEY, uninstall_sub_key_name])
                         try:
                             # Opening matching browser key
                             browser_key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, browser_key_name,
@@ -67,7 +71,7 @@ def finder():
                                 except WindowsError as _:
                                     pass
                             # Updating "found browser" list
-                            found_browsers.append([browser, browser_name, browser_version, browser_path])
+                            list_found_browsers.append([browser, browser_name, browser_version, browser_path])
                         except WindowsError as _:
                             pass
                         finally:
@@ -82,4 +86,4 @@ def finder():
         _winreg.CloseKey(uninstall_key)
 
     # Returning results list with all found browsers values
-    return found_browsers
+    return list_found_browsers
