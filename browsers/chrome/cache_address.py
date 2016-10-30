@@ -38,6 +38,7 @@ class CacheAddress(object):
             self.file_number = int(self.bin_address[4:], 2)
             self.file_name = "f_" + str(format(self.file_number, "06x"))
             self.file_path = os.sep.join([self.cache_path, self.file_name])
+
         # Data_ file
         else:
             self.block_size = int(self.bin_address[6:8], 2)

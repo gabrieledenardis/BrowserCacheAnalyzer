@@ -49,14 +49,15 @@ class CacheResource(object):
 
             # Resource is HTTP Header
             if self.is_http_header is True:
-                self.resource_data = http_header_values(self.resource_data)
+                self.resource_data = http_header_values(raw_header=self.resource_data)
+
             # Resource is not HTTP header
             else:
                 self.resource_data = urllib.unquote(self.resource_data.replace("=2E", ".").replace("=20", " ")
                                                     .replace("=3D", "="))
 
 
-def http_header_values(raw_header):
+def http_header_values(raw_header=None):
     """Reading a raw header from resource and separating tag and value.
     :param raw_header: raw header from resource data
     :return: HTTP header tag and values

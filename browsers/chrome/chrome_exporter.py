@@ -15,6 +15,7 @@ import shutil
 from utilities import utils
 import index_header_reader
 import data_header_reader
+from operating_systems import windows
 
 
 class ChromeExporter(QtCore.QObject):
@@ -77,15 +78,9 @@ class ChromeExporter(QtCore.QObject):
         export_report_index = os.path.join(export_report_path, "index_report.html")
         export_results_index = os.path.join(export_results_path, "index_results.html")
 
-        # System info
-        os_name = platform.system()
-        os_rel = platform.release()
-        os_rel_ver = platform.version()
-        hostname = platform.node()
-
         # Chrome "index" file info
         chrome_index_file = os.path.join(self.input_path, "index")
-        chrome_index_header = index_header_reader.read_index_header(chrome_index_file)
+        chrome_index_header = index_header_reader.read_index_header(index_file=chrome_index_file)
         chrome_index_info = utils.get_file_info(file_path=chrome_index_file)
 
         # Chrome cache folder info
@@ -106,6 +101,7 @@ class ChromeExporter(QtCore.QObject):
         )
 
         # Report info
+        time_info = windows.registry_system_time.get_registry_time_info()
         html_string_report_info = """
         <h1> <b> Browser Cache Analyzer <br> Export report [{analysis_date}] </b> </h1>
         <p> <b> Analysis folder: </b> {input_folder} </p>
@@ -118,6 +114,13 @@ class ChromeExporter(QtCore.QObject):
         <p> <b> Release: </b> {release} </p>
         <p> <b> Release version: </b> {release_version} </p>
         <p> <b> Hostname: </b> {hostname} </p>
+        <hr>
+        <h2> System time info </h2>
+        <p> <b> Last known good time: </b> {last_known} </p>
+        <p> <b> Next synchronization time: </b> {next_sync} </p>
+        <p> <b> Ntp server: </b> {ntp_server} </p>
+        <p> <b> Synchronization type: </b> {sync_type} </p>
+        <p> <b> Time zone: </b> {time_zone} </p>
         <hr>
         <h2> Browser info </h2>
         <p> <b> Browser: </b> {browser} </p>
@@ -138,10 +141,15 @@ class ChromeExporter(QtCore.QObject):
             export_folder=os.path.join(self.export_path, self.export_folder_name),
             export_md5=self.export_md5,
             export_sha1=self.export_sha1,
-            os_name=os_name,
-            release=os_rel,
-            release_version=os_rel_ver,
-            hostname=hostname,
+            last_known=time_info['last_known_time'],
+            next_sync=time_info['next_sync_time'],
+            ntp_server=time_info['ntp_server'],
+            sync_type=time_info['sync_type'],
+            time_zone=time_info['time_zone'],
+            os_name=platform.system(),
+            release=platform.release(),
+            release_version= platform.version(),
+            hostname=platform.node(),
             browser=self.browser,
             browser_version=self.browser_version,
             browser_inst_path=self.browser_inst_path,
@@ -344,14 +352,18 @@ class ChromeExporter(QtCore.QObject):
         <tbody>
         """
 
+        # Export is running
+        self.worker_is_running = True
         html_string_results_table_row = ""
         for idx, entry in enumerate(self.entries_to_export, 1):
-            self.worker_is_running = True
+
             # "Button_stop_export" clicked
             if self.signal_stop.is_set():
                 self.stopped_by_user = True
                 self.worker_is_running = False
                 break
+
+            # Updating "progressBar_analysis"
             self.signal_update_export.emit(
                 idx,
                 len(self.entries_to_export)
@@ -376,7 +388,8 @@ class ChromeExporter(QtCore.QObject):
             # Columns "Content Type" and "Creation Time"
             if (entry.data_stream_addresses[0] and
                     isinstance(entry.data_stream_addresses[0].resource_data, dict)):
-                # Resource info
+
+                # "Content-Type" in HTTP header
                 if "Content-Type" in entry.data_stream_addresses[0].resource_data:
                     html_string_results_table_row += """
                     <td> {content_type} </td> <td> {key_data} </td> <td> {creation_time} </td>
@@ -386,6 +399,8 @@ class ChromeExporter(QtCore.QObject):
                         key_data=entry.key_data[:75],
                         creation_time=entry.creation_time
                     )
+
+                # "Content-Type" not in HTTP header
                 else:
                     html_string_results_table_row += """
                     <td> - </td> <td> {key_data} </td> <td> {creation_time} </td>
@@ -394,6 +409,8 @@ class ChromeExporter(QtCore.QObject):
                         key_data=entry.key_data[:75],
                         creation_time=entry.creation_time
                     )
+
+            # Not HTTP Header
             else:
                 html_string_results_table_row += """
                 <td> - </td> <td> {key_data} </td> <td> {creation_time} </td>
@@ -523,6 +540,7 @@ class ChromeExporter(QtCore.QObject):
                             html_string_file_http_header += """
                             <h3> Header </h3>
                             """
+
                             # Header keys and values
                             for key, key_value in item.resource_data.iteritems():
                                 html_string_file_http_header += """
@@ -531,9 +549,11 @@ class ChromeExporter(QtCore.QObject):
                                     key=key,
                                     key_value=key_value
                                 )
+
                             html_string_file_http_header += """
                             <hr>
                             """
+
                     # Not HTTP Header
                     elif str_add != 0:
                         if item:
@@ -610,5 +630,6 @@ class ChromeExporter(QtCore.QObject):
                 html_string_results_close
             )
 
+        # Export terminated
         self.worker_is_running = False
         self.signal_finished.emit()

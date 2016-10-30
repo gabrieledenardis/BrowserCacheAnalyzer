@@ -664,8 +664,8 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             self.line_output_path_export.setText(str(self.export_folder_path))
 
             # Generating random MD5 and SHA1 for the export
-            export_md5 = utils.get_random_hash()['random_md5']
-            export_sha1 = utils.get_random_hash()['random_sha1']
+            export_md5 = utils.create_random_hash()['random_md5']
+            export_sha1 = utils.create_random_hash()['random_sha1']
 
             # Analyzer thread and worker
             self.chrome_exporter_thread = QtCore.QThread()
@@ -738,7 +738,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             shutil.rmtree(self.export_folder_path, ignore_errors=True)
             QtGui.QMessageBox.information(
                 QtGui.QMessageBox(), "Deleted folder",
-                "{folder} Deleted after stop export".format(folder=self.export_folder_path),
+                "{folder} deleted after stop export".format(folder=self.export_folder_path),
                 QtGui.QMessageBox.Ok
             )
 

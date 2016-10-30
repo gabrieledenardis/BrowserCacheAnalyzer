@@ -8,7 +8,7 @@ import struct
 from utilities import utils
 
 
-def read_index_header(index_file):
+def read_index_header(index_file=None):
     """Reading "index" file in chrome cache.
     :param index_file: path to file index
     :return: values read in chrome "index" file header
@@ -31,7 +31,10 @@ def read_index_header(index_file):
 
         # Creation time
         webkit_creation_time = hex(struct.unpack("<Q", f_index.read(8))[0])
-        creation_time = utils.webkit_to_unix_timestamp(webkit_creation_time)
+        creation_time = utils.webkit_to_unix_timestamp(
+            webkit_time=webkit_creation_time,
+            source="chrome_cache"
+        )
 
     results = {'signature': signature,
                'minor_version': minor_version,

@@ -18,8 +18,8 @@ class CacheEntry(object):
         """Complete entity stored in cache.
         :param cache_path: path for chrome cache
         :param entry_file: file containing the entry
-        :param block_dimension: dimension of the block within the file (depending on data_# file)
-        :param block_number: number of the block within the file
+        :param block_dimension: dimension of the block in data_# file (depending on data_# file)
+        :param block_number: number of the block in data_# file
         """
 
         # Values for the entry
@@ -48,7 +48,11 @@ class CacheEntry(object):
                 self.reuse_count = struct.unpack("<I", f_entry.read(4))[0]
                 self.refetch_count = struct.unpack("<I", f_entry.read(4))[0]
                 self.entry_state = ENTRY_STATE_SELECTOR[struct.unpack("<I", f_entry.read(4))[0]]
-                self.creation_time = utils.webkit_to_unix_timestamp(hex(struct.unpack("<Q", f_entry.read(8))[0]))
+                webkit_creation_time = hex(struct.unpack("<Q", f_entry.read(8))[0])
+                self.creation_time = utils.webkit_to_unix_timestamp(
+                    webkit_time=webkit_creation_time,
+                    source="chrome_cache"
+                )
                 self.key_data_size = struct.unpack("<I", f_entry.read(4))[0]
                 self.long_key_data_address = struct.unpack("<I", f_entry.read(4))[0]
 
@@ -92,11 +96,14 @@ class CacheEntry(object):
                                 is_http_header=False
                             )
 
+                        # Updating "data_stream_addresses"
                         self.data_stream_addresses.insert(s_address, self.cache_resource_instance)
-
+                        # Resource dimension for this entry
                         self.resource_dimension = self.data_stream_sizes[s_address]
+
                     # Not valid and not existing address
                     else:
+                        # Updating "data_stream_addresses"
                         self.data_stream_addresses.insert(s_address, None)
 
                 # Cache entry flags
@@ -106,8 +113,7 @@ class CacheEntry(object):
                 # The hash of the entry up to this point
                 self.self_hash = struct.unpack("<I", f_entry.read(4))[0]
 
-                # Key
-                # If zero, key is local
+                # Key (if zero, key is local)
                 if self.long_key_data_address == 0:
                     # Value for the key
                     for c in range(self.key_data_size):
@@ -119,7 +125,8 @@ class CacheEntry(object):
 
                     # Replacing eventual end-of string character (=00)
                     self.key_data = self.key_data.replace("=00", "")
-                # Address of key_data
+
+                # Address of key_data (key is not local)
                 else:
                     self.key_file_instance = cache_address.CacheAddress(
                         binary_address=format(self.long_key_data_address, "032b"),
@@ -135,7 +142,9 @@ class CacheEntry(object):
                         is_http_header="Unknown"
                     )
 
+                    # Resource data for this entry
                     self.key_data = self.key_resource_instance.resource_data
+
         except Exception as _:
             pass
 

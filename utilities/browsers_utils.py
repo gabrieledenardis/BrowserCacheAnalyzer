@@ -42,7 +42,7 @@ def get_default_cache_path(browser_name=None):
     """Get default cache path for a given browser.
     Checking if a key for a browser is stored in "BROWSERS_DEFAULT_CACHE_PATHS".
     :param browser_name: complete name for browser
-    :return: matching_browser_key, default_cache_path
+    :return: matching_browser_key and default_cache_path
     """
 
     # Values for matching browser

@@ -5,7 +5,7 @@
 import struct
 
 
-def read_data_header(data_to_open):
+def read_data_header(data_to_open=None):
     """Reading chrome cache file "data_#".
     :param data_to_open: path to file index
     :return: values read in data_# file header

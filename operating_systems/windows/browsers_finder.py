@@ -8,17 +8,17 @@ except ImportError:
     _winreg = None
 
 # Project imports
-from utilities import browsers_utils, utils
+from utilities import utils, browsers_utils
 
-# Uninstall registry key (For user installed browsers)
-UNINSTALL_KEY = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+# # Uninstall registry key (For user installed browsers)
+# UNINSTALL_KEY = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
 
 
 def finder():
     """ Looking in system registry for installed browsers.
-    For user installed browsers, if values in "USER_INSTALLED_BROWSERS" are also in "uninstall" key in system registry,
-    retrieving values and adding in "list_found browsers".
-    :return: found_browsers (list of found browsers in the system).
+    For user installed browsers, if values in "utils.USER_INSTALLED_BROWSERS" are also in "uninstall" key
+    in system registry, retrieving values and adding in "list_found browsers"
+    :return: list of found browsers in the system
     """
 
     # Uninstall key (For user installed browsers)
@@ -28,19 +28,13 @@ def finder():
     browser_name = None
     browser_version = None
     browser_path = None
-    browser_inst_date = None
 
     # List of found browsers in the system
     list_found_browsers = []
 
     try:
         # Opening uninstall key
-        uninstall_key = _winreg.OpenKey(
-            _winreg.HKEY_LOCAL_MACHINE,
-            UNINSTALL_KEY,
-            0,
-            _winreg.KEY_READ
-        )
+        uninstall_key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, utils.UNINSTALL_KEY, 0, _winreg.KEY_READ)
 
         # Searching in sub keys of uninstall key for user installed browsers
         for s_k in range(_winreg.QueryInfoKey(uninstall_key)[0]):
@@ -51,26 +45,30 @@ def finder():
                     # A browser in "user installed browsers" matches a sub key name
                     if browser in uninstall_sub_key_name.lower():
                         # Matching browser key name
-                        browser_key_name = "\\".join([UNINSTALL_KEY, uninstall_sub_key_name])
+                        browser_key_name = "\\".join([utils.UNINSTALL_KEY, uninstall_sub_key_name])
                         try:
                             # Opening matching browser key
-                            browser_key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, browser_key_name,
-                                                          0, _winreg.KEY_READ)
+                            browser_key = _winreg.OpenKey(
+                                _winreg.HKEY_LOCAL_MACHINE,
+                                browser_key_name,
+                                0,
+                                _winreg.KEY_READ
+                            )
                             # Searching in matching browser key values
                             for val in range(_winreg.QueryInfoKey(browser_key)[1]):
                                 try:
                                     # Browser key values
-                                    reg_name, reg_value, reg_type = _winreg.EnumValue(browser_key, val)
+                                    value_name, value_data, value_data_type = _winreg.EnumValue(browser_key, val)
                                     # Name, version and installation path values
-                                    if reg_name == "DisplayName":
-                                        browser_name = reg_value
-                                    if reg_name == "DisplayVersion":
-                                        browser_version = reg_value
-                                    if reg_name == "InstallLocation":
-                                        browser_path = reg_value
+                                    if value_name == "DisplayName":
+                                        browser_name = value_data
+                                    elif value_name == "DisplayVersion":
+                                        browser_version = value_data
+                                    elif value_name == "InstallLocation":
+                                        browser_path = value_data
                                 except WindowsError as _:
                                     pass
-                            # Updating "found browser" list
+                            # Updating "list_found_browsers"
                             list_found_browsers.append([browser, browser_name, browser_version, browser_path])
                         except WindowsError as _:
                             pass
