@@ -26,6 +26,7 @@ class ChromeExporter(QtCore.QObject):
     # Signals
     signal_finished = QtCore.pyqtSignal()
     signal_update_export = QtCore.pyqtSignal(int, int)
+    signal_enable_stop_button = QtCore.pyqtSignal()
 
     def __init__(self, parent=None, input_path=None, export_path=None, export_folder_name=None, entries_to_export=None,
                  browser_info=None, browser_def_path=None, export_md5=None, export_sha1=None):
@@ -34,6 +35,7 @@ class ChromeExporter(QtCore.QObject):
         # Signal from "button_stop_export"
         self.signal_stop = Event()
 
+        # Attributes
         self.input_path = input_path
         self.export_path = export_path
         self.export_folder_name = export_folder_name
@@ -44,7 +46,6 @@ class ChromeExporter(QtCore.QObject):
         self.browser_def_path = browser_def_path
         self.export_md5 = export_md5
         self.export_sha1 = export_sha1
-
         self.stopped_by_user = False
         self.worker_is_running = False
 
@@ -354,8 +355,13 @@ class ChromeExporter(QtCore.QObject):
 
         # Export is running
         self.worker_is_running = True
+
         html_string_results_table_row = ""
         for idx, entry in enumerate(self.entries_to_export, 1):
+
+            # Enabling "button_stop_export"
+            if idx > 1:
+                self.signal_enable_stop_button.emit()
 
             # "Button_stop_export" clicked
             if self.signal_stop.is_set():
@@ -497,7 +503,7 @@ class ChromeExporter(QtCore.QObject):
                 html_string_resource_values = ""
                 for str_add, item in enumerate(entry.data_stream_addresses):
                     # HTTP Header
-                    if str_add == 0:
+                    if str_add == 0 and item:
                         file_entry_data = "".join((file_entry, "-header"))
                         header_dimension = 8192
                         resource_file = item.resource_file
@@ -555,47 +561,46 @@ class ChromeExporter(QtCore.QObject):
                             """
 
                     # Not HTTP Header
-                    elif str_add != 0:
-                        if item:
-                            if not item.is_http_header or item.is_http_header == "Unknown":
-                                file_entry_data = "".join((file_entry, "-data{num}".format(num=str_add)))
+                    elif str_add != 0 and item:
+                        if not item.is_http_header or item.is_http_header == "Unknown":
+                            file_entry_data = "".join((file_entry, "-data{num}".format(num=str_add)))
 
-                                # Key data NOT in separate file
-                                if item.file_type != "000":
+                            # Key data NOT in separate file
+                            if item.file_type != "000":
 
-                                    header_dimension = 8192
-                                    resource_file = item.resource_file
-                                    block_dimension = item.block_dimension
-                                    block_number = item.block_number
-                                    resource_size = item.resource_size
-                                    resource_offset = header_dimension + (block_dimension * block_number)
+                                header_dimension = 8192
+                                resource_file = item.resource_file
+                                block_dimension = item.block_dimension
+                                block_number = item.block_number
+                                resource_size = item.resource_size
+                                resource_offset = header_dimension + (block_dimension * block_number)
 
-                                    # Values for the resource
-                                    html_string_resource_values += """
-                                    <h3> Resource values (Data) </h3>
-                                    <p> <b> Resource file:  </b> {resource_file} </p>
-                                    <p> <b> File header dimension:  </b> {header_dimension} </p>
-                                    <p> <b> Block dimension:  </b> {block_dimension} </p>
-                                    <p> <b> Block number:  </b> {block_number} </p>
-                                    <p> <b> Resource size:  </b> {resource_size} </p>
-                                    <p> <b> Resource offset:  </b> {offset} </p>
-                                    <hr>
-                                    """.format(
-                                        resource_file=resource_file,
-                                        header_dimension=8192,
-                                        block_dimension=block_dimension,
-                                        block_number=block_number,
-                                        resource_size=resource_size,
-                                        offset=resource_offset
-                                    )
+                                # Values for the resource
+                                html_string_resource_values += """
+                                <h3> Resource values (Data) </h3>
+                                <p> <b> Resource file:  </b> {resource_file} </p>
+                                <p> <b> File header dimension:  </b> {header_dimension} </p>
+                                <p> <b> Block dimension:  </b> {block_dimension} </p>
+                                <p> <b> Block number:  </b> {block_number} </p>
+                                <p> <b> Resource size:  </b> {resource_size} </p>
+                                <p> <b> Resource offset:  </b> {offset} </p>
+                                <hr>
+                                """.format(
+                                    resource_file=resource_file,
+                                    header_dimension=8192,
+                                    block_dimension=block_dimension,
+                                    block_number=block_number,
+                                    resource_size=resource_size,
+                                    offset=resource_offset
+                                )
 
-                                    # Creating a file to save the resource read
-                                    with open(file_entry_data, "wb") as f_entry_data:
-                                        f_entry_data.write(str(item.resource_data))
+                                # Creating a file to save the resource read
+                                with open(file_entry_data, "wb") as f_entry_data:
+                                    f_entry_data.write(str(item.resource_data))
 
-                                # Copying separate file if key data is in a separate file
-                                else:
-                                    shutil.copy(item.resource_file, file_entry_data)
+                            # Copying separate file if key data is in a separate file
+                            else:
+                                shutil.copy(item.resource_file, file_entry_data)
 
                 #  Closing HTML file for the entry
                 html_string_file_entry_close = """

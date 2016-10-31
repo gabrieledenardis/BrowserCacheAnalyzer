@@ -9,7 +9,6 @@ from PyQt4 import QtCore
 import platform
 import os
 import datetime
-import time
 import shutil
 
 # Project imports
@@ -55,7 +54,12 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             line.setReadOnly(True)
             line.setFrame(False)
 
+        #########################################
         # ********** Browsers screen ********** #
+
+        # "GroupBox_installed_browsers"
+        self.groupBox_installed_browsers.setFocusPolicy(QtCore.Qt.ClickFocus)
+        self.groupBox_installed_browsers.installEventFilter(self)
 
         # "Table_installed_browsers"
         self.table_installed_browsers.setColumnCount(4)
@@ -69,12 +73,13 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.table_installed_browsers.setAlternatingRowColors(True)
         self.table_installed_browsers.setToolTip("Click on a row to select a browser")
 
+        #############################################
         # ********** Input folder screen ********** #
 
         # "GroupBox_input_folder"
         self.groupBox_input_folder.setStyleSheet("QLineEdit {background-color: transparent}")
         for line in self.groupBox_input_folder.findChildren(QtGui.QLineEdit):
-            if "line_analysis_input_path" != line.objectName():
+            if "line_input_path_folder_screen" != line.objectName():
                 line.setFrame(False)
             line.setFocusPolicy(QtCore.Qt.ClickFocus)
             line.installEventFilter(self)
@@ -90,9 +95,10 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             line.setReadOnly(True)
             line.setFrame(False)
 
+        #########################################
         # ********** Analysis screen ********** #
 
-        # "GroupBox_analysis_preview" 
+        # "GroupBox_analysis_preview"
         self.line_input_path_analysis.setStyleSheet("background-color: transparent")
         self.line_input_path_analysis.installEventFilter(self)
         self.line_input_path_analysis.setReadOnly(True)
@@ -110,14 +116,17 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.table_analysis_preview.setAlternatingRowColors(True)
         self.table_analysis_preview.setSortingEnabled(True)
 
+        ##########################################
         # ********** Exporting screen ********** #
 
         # "GroupBox_export"
         for line in self.groupBox_export.findChildren(QtGui.QLineEdit):
             line.setStyleSheet("background-color: transparent")
+            line.installEventFilter(self)
             line.setReadOnly(True)
             line.setFrame(False)
 
+        #############################################
         # ********** Application buttons ********** #
 
         # Application buttons
@@ -151,6 +160,8 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.clipboard = None
         # QDialog for chrome advanced info on items in "table_analysis_preview"
         self.chrome_preview_dialog = None
+        # Context menu on "table_analysis_preview" during analysis
+        self.context_menu_enabled = False
 
         # Threads
         self.chrome_analyzer_thread = None
@@ -298,6 +309,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             if len(browser_process):
                 # String with pids and names from "browser_process_list"
                 browser_processes_string = ""
+
                 for pid, name in browser_process.iteritems():
                     browser_processes_string += "pid: {pid} \t name: {name}\n".format(pid=pid, name=name)
 
@@ -309,6 +321,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                     ),
                     QtGui.QMessageBox.Ok
                 )
+
             # Selected browser is not open
             else:
                 # Input screen settings"
@@ -346,6 +359,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                     mark_path = os.path.join(utils.ICONS_PATH, "mark_valid.png")
                     self.label_browser_mark_path.setToolTip("Path is valid for selected browser")
                     self.button_analyze_default_path.setEnabled(True)
+
                 # Not valid default cache path
                 else:
                     mark_path = os.path.join(utils.ICONS_PATH, "mark_not_valid.png")
@@ -355,6 +369,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                 # Mark for default path
                 mark_icon = QtGui.QPixmap(mark_path)
                 self.label_browser_mark_path.setPixmap(mark_icon)
+
         # "Button_analysis_screen_back" button in "analysis screen"
         elif clicked_button == "button_analysis_screen_back":
 
@@ -375,8 +390,9 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             # Setting "current input path" as "default path"
             self.current_input_path = self.default_cache_path
 
-            self.line_analysis_input_path.setText(self.current_input_path)
-            self.line_analysis_input_path.home(False)
+            self.line_input_path_folder_screen.setText(self.current_input_path)
+            self.line_input_path_folder_screen.home(False)
+
         # "Other path" button
         elif clicked_button == "button_analyze_other_path":
             # Selecting an input path to analyze
@@ -402,6 +418,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                 self.line_analysis_input_path.setText(self.current_input_path.replace("/", "\\"))
                 self.line_analysis_input_path.home(False)
             # Selected path to analyze is not correct
+
             else:
                 # Path is selected but not correct
                 if dialog_input_path:
@@ -416,6 +433,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                         ),
                         QtGui.QMessageBox.Ok
                     )
+
                 # No selected path to analyze
                 else:
                     QtGui.QMessageBox.information(
@@ -462,6 +480,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             self.line_file_creation_time.setText(str(file_info["file_creation_time"]))
             self.line_file_last_modified.setText(str(file_info["file_last_modified_time"]))
             self.line_file_last_access.setText(str(file_info["file_last_access_time"]))
+
         except Exception as _:
             QtGui.QMessageBox.critical(
                 QtGui.QMessageBox(), "Error", "Unable to open file <br> {item}".format(item=selected_item),
@@ -544,31 +563,35 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         :return:
         """
 
-        # Context menu
-        menu = QtGui.QMenu()
-        action_copy_to_clipboard = menu.addAction("Copy item to clipboard")
-        action_advanced_results = menu.addAction("Show advanced results")
-        action = menu.exec_(self.table_analysis_preview.mapToGlobal(position))
+        # Context menu enabled
+        if self.context_menu_enabled:
+            # Context menu
+            menu = QtGui.QMenu()
+            action_copy_to_clipboard = menu.addAction("Copy item to clipboard")
+            action_advanced_results = menu.addAction("Show advanced results")
+            action = menu.exec_(self.table_analysis_preview.mapToGlobal(position))
 
-        # Copy element
-        if action == action_copy_to_clipboard:
-            selection = self.table_analysis_preview.currentItem().text()
-            self.clipboard.clear()
-            self.clipboard.setText(selection)
-            QtGui.QMessageBox.information(
-                QtGui.QMessageBox(), "Clipboard",
-                "{selection}\n\nElement copied to clipboard".format(selection=selection),
-                QtGui.QMessageBox.Ok
-            )
-        if action == action_advanced_results:
-            # Retrieving selected item from "table_analysis_preview"
-            # Position in results list = table row
-            current_table_row = self.table_analysis_preview.currentRow()
-            current_result_item = self.list_found_cache_entries[current_table_row]
+            # Copy element
+            if action == action_copy_to_clipboard:
+                selection = self.table_analysis_preview.currentItem().text()
+                self.clipboard.clear()
+                self.clipboard.setText(selection)
+                QtGui.QMessageBox.information(
+                    QtGui.QMessageBox(), "Clipboard",
+                    "{selection}\n\nElement copied to clipboard".format(selection=selection),
+                    QtGui.QMessageBox.Ok
+                )
 
-            # File preview
-            self.chrome_preview_dialog = chrome_preview_dialog.ChromePreviewDialog(item=current_result_item)
-            self.chrome_preview_dialog.exec_()
+            # Advanced results
+            if action == action_advanced_results:
+                # Retrieving selected item from "table_analysis_preview"
+                # Position in results list = table row
+                current_table_row = self.table_analysis_preview.currentRow()
+                current_result_item = self.list_found_cache_entries[current_table_row]
+
+                # File preview
+                self.chrome_preview_dialog = chrome_preview_dialog.ChromePreviewDialog(item=current_result_item)
+                self.chrome_preview_dialog.exec_()
 
     def stop_analysis(self):
         """Slot for "button_stop_analysis" in "analysis screen".
@@ -583,6 +606,9 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         A message box will confirm if analysis normally terminated or stopped by user.
         :return: nothing
         """
+
+        # Enabling context menu on "table_analysis_preview"
+        self.context_menu_enabled = True
 
         # Browser name from selection in "table_installed_browsers"
         browser_name = self.selection_table_installed_browsers[0].text()
@@ -599,6 +625,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             self.button_analysis_screen_back.setEnabled(True)
             self.button_stop_analysis.setEnabled(False)
             self.button_quit_analysis_screen.setEnabled(True)
+            
         # Analysis normal termination
         else:
             QtGui.QMessageBox.information(
@@ -643,7 +670,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             self.button_home.setEnabled(False)
             self.button_show_folder.setEnabled(False)
             self.button_quit_export_screen.setEnabled(False)
-            self.button_stop_export.setEnabled(True)
+            self.button_stop_export.setEnabled(False)
             self.progressBar_export.reset()
 
             current_datetime = datetime.datetime.now().strftime("%d-%b-%Y-%H_%M_%S")
@@ -689,6 +716,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             self.chrome_exporter_thread.finished.connect(self.chrome_exporter_thread.deleteLater)
             self.chrome_exporter_worker.signal_update_export.connect(self.update_export_progress)
             self.chrome_exporter_thread.finished.connect(self.export_terminated)
+            self.chrome_exporter_worker.signal_enable_stop_button.connect(self.enable_stop_export_button)
             self.chrome_exporter_thread.start()
 
         # Not selected output path for export
@@ -697,6 +725,13 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                 QtGui.QMessageBox(), "No selected folder",
                 "Seems you did not select an output folder. <br> Please selected one", QtGui.QMessageBox.Ok
             )
+
+    def enable_stop_export_button(self):
+        """Slot for "signal_enable_stop_button" in "chrome_exporter_worker".
+        Enabling stop button if export started.
+        :return: nothing
+        """
+        self.button_stop_export.setEnabled(True)
 
     def update_export_progress(self, exported_entries=None, tot_entries=None):
         """Slot for "signal_update_export" in "chrome_exporter_worker".
@@ -848,6 +883,55 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         # Application window move (with mouse left button)
         if event.buttons() == QtCore.Qt.LeftButton:
             self.move(event.globalPos() - self.mouse_press_position)
+
+
+#########################
+# SECTION: EVENT FILTER #
+#########################
+
+    def eventFilter(self, q_object, q_event):
+        """
+        Filters events if this object has been installed as an event filter for the watched object.
+        :param q_object: QObject
+        :param q_event: QEvent
+        :return: eventFilter(q_object, q_event)
+        """
+
+        # Mouse hover enter event
+        if q_event.type() == QtCore.QEvent.HoverEnter:
+            # "GroupBox_system_info"
+            if q_object in self.groupBox_system_info.findChildren(QtGui.QLineEdit):
+                QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
+            # "GroupBox_selected_browser_info"
+            elif q_object in self.groupBox_selected_browser_info.findChildren(QtGui.QLineEdit):
+                QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
+            # "GroupBox_installed_browsers"
+            elif q_object == self.groupBox_installed_browsers:
+                QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+            # "Lines edit" in "groupBox_input_folder"
+            elif q_object in self.groupBox_input_folder.findChildren(QtGui.QLineEdit):
+                if not q_object.text().isEmpty():
+                    QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
+            # "Lines edit" in "groupBox_input_folder"
+            elif q_object in self.groupBox_input_folder_preview.findChildren(QtGui.QLineEdit):
+                if not q_object.text().isEmpty():
+                    QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
+            # "Line_input_path_analysis"
+            elif q_object == self.line_input_path_analysis:
+                QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
+            # "Lines edit" in "groupBox_export"
+            elif q_object == self.line_input_path_export or q_object == self.line_output_path_export:
+                QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
+
+        # Mouse hover leave event
+        elif q_event.type() == QtCore.QEvent.HoverLeave:
+            QtGui.QApplication.restoreOverrideCursor()
+
+        elif q_event.type() == QtCore.QEvent.MouseButtonRelease:
+            QtGui.QApplication.restoreOverrideCursor()
+
+        # Pass the event on to the parent class
+        return QtGui.QMainWindow.eventFilter(self, q_object, q_event)
 
 
 ###############################################################################
