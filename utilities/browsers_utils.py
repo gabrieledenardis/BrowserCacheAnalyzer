@@ -13,9 +13,15 @@ USER_INSTALLED_BROWSERS = ["chrome", "firefox", "opera"]
 # Browsers cache default paths
 BROWSERS_DEFAULT_CACHE_PATHS = {
 
-    ("chrome", "windows", "10"): os.path.join("C:", os.sep, "Users", unicode(os.environ['USERNAME']),
-                                              "AppData", "Local", "Google", "Chrome", "User Data", "Default", "Cache"),
+    ("chrome", "windows", "10"): os.path.join(
+        "C:", os.sep, "Users", unicode(os.environ['USERNAME']), "AppData", "Local", "Google", "Chrome", "User Data",
+        "Default", "Cache"
+    ),
 
+    ("opera", "windows", "10"): os.path.join(
+        "C:", os.sep, "Users", unicode(os.environ['USERNAME']), "AppData", "Local", "Opera Software", "Opera Stable",
+        "Cache"
+    )
 }
 
 
@@ -79,6 +85,16 @@ def check_valid_cache_path(browser=None, cache_path=None):
     if os.path.exists(cache_path):
         # Google Chrome
         if browser == "chrome":
+            # Chrome index and data_ files
+            chrome_files = ["index", "data_0", "data_1", "data_2", "data_3"]
+            # All files in "chrome_files" are in cache folder
+            if set(chrome_files).issubset(os.listdir(cache_path)):
+                return True
+            # Not all files in "chrome_files" are in cache folder
+            return False
+
+        # Opera
+        elif browser == "opera":
             # Chrome index and data_ files
             chrome_files = ["index", "data_0", "data_1", "data_2", "data_3"]
             # All files in "chrome_files" are in cache folder

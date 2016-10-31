@@ -119,7 +119,7 @@ def webkit_to_unix_timestamp(webkit_time=None, **options):
     webkit_time_sec = None
 
     # Time from chrome cache (microseconds)
-    if options.get("source") == "chrome_cache":
+    if options.get("source") == "chrome_cache" or options.get("source") == "opera_cache":
         # Conversion from microseconds to seconds
         microsec_in_sec = float(1000000)
         webkit_time_microsec = float(int(webkit_time, 0))

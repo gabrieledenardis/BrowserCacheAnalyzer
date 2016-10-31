@@ -15,7 +15,7 @@ import shutil
 from gui import bca_converted_gui
 from operating_systems import windows
 from utilities import utils, browsers_utils
-from browsers import chrome
+from browsers import chrome, opera
 from gui.browsers_dialogs import chrome_preview_dialog
 
 
@@ -169,6 +169,16 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.chrome_exporter_thread = None
         self.chrome_exporter_worker = None
 
+        self.opera_analyzer_thread = None
+        self.opera_analyzer_worker = None
+        self.opera_exporter_thread = None
+        self.opera_exporter_worker = None
+
+        self.current_analyzer_thread = None
+        self.current_analyzer_worker = None
+        self.current_exporter_thread = None
+        self.current_exporter_worker = None
+
 
 ##########################################
 # SECTION: SIGNALS AND SLOTS CONNECTIONS #
@@ -298,9 +308,9 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             browser_install_path = self.selection_table_installed_browsers[2].text()
 
             # Matching key for selected browser
-            browser_info_path = browsers_utils.get_default_cache_path(browser_name=browser_name)
-            self.matching_browser_key = browser_info_path['matching_browser_key']
-            self.default_cache_path = browser_info_path['default_cache_path']
+            browser_default_path = browsers_utils.get_default_cache_path(browser_name=browser_name)
+            self.matching_browser_key = browser_default_path['matching_browser_key']
+            self.default_cache_path = browser_default_path['default_cache_path']
 
             # Processes for selected browser
             browser_process = browsers_utils.check_open_browser(self.matching_browser_key)
@@ -513,21 +523,41 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         # Clipboard to store copied values from "table_analysis_preview"
         self.clipboard = QtGui.QApplication.clipboard()
 
-        # Analyzer thread and worker
-        self.chrome_analyzer_thread = QtCore.QThread()
-        self.chrome_analyzer_worker = chrome.chrome_analyzer.ChromeAnalyzer(input_path=self.current_input_path)
-        self.chrome_analyzer_worker.moveToThread(self.chrome_analyzer_thread)
+        # Chrome threads
+        if self.matching_browser_key == "chrome":
+            # Analyzer thread and worker
+            self.chrome_analyzer_thread = QtCore.QThread()
+            self.chrome_analyzer_worker = chrome.chrome_analyzer.ChromeAnalyzer(input_path=self.current_input_path)
+            self.chrome_analyzer_worker.moveToThread(self.chrome_analyzer_thread)
 
-        # Analyzer thread and worker signals connections
-        self.chrome_analyzer_thread.started.connect(self.chrome_analyzer_worker.analyze_cache)
-        self.chrome_analyzer_worker.signal_finished.connect(self.chrome_analyzer_thread.quit)
-        self.chrome_analyzer_worker.signal_finished.connect(self.chrome_analyzer_worker.deleteLater)
-        self.chrome_analyzer_thread.finished.connect(self.chrome_analyzer_thread.deleteLater)
+            # Analyzer thread and worker signals connections
+            self.chrome_analyzer_thread.started.connect(self.chrome_analyzer_worker.analyze_cache)
+            self.chrome_analyzer_worker.signal_finished.connect(self.chrome_analyzer_thread.quit)
+            self.chrome_analyzer_worker.signal_finished.connect(self.chrome_analyzer_worker.deleteLater)
+            self.chrome_analyzer_thread.finished.connect(self.chrome_analyzer_thread.deleteLater)
+            self.chrome_analyzer_thread.finished.connect(self.analysis_terminated)
+            self.chrome_analyzer_worker.signal_update_table_preview.connect(self.update_table_preview)
+            self.current_analyzer_thread = self.chrome_analyzer_thread
+            self.current_analyzer_worker = self.chrome_analyzer_worker
+            self.current_analyzer_thread.start()
 
-        self.chrome_analyzer_thread.finished.connect(self.analysis_terminated)
-        self.chrome_analyzer_worker.signal_update_table_preview.connect(self.update_table_preview)
+        # Opera threads
+        elif self.matching_browser_key == "opera":
+            # Analyzer thread and worker
+            self.opera_analyzer_thread = QtCore.QThread()
+            self.opera_analyzer_worker = opera.opera_analyzer.OperaAnalyzer(input_path=self.current_input_path)
+            self.opera_analyzer_worker.moveToThread(self.opera_analyzer_thread)
 
-        self.chrome_analyzer_thread.start()
+            # Analyzer thread and worker signals connections
+            self.opera_analyzer_thread.started.connect(self.opera_analyzer_worker.analyze_cache)
+            self.opera_analyzer_worker.signal_finished.connect(self.opera_analyzer_thread.quit)
+            self.opera_analyzer_worker.signal_finished.connect(self.opera_analyzer_worker.deleteLater)
+            self.opera_analyzer_thread.finished.connect(self.opera_analyzer_thread.deleteLater)
+            self.opera_analyzer_thread.finished.connect(self.analysis_terminated)
+            self.opera_analyzer_worker.signal_update_table_preview.connect(self.update_table_preview)
+            self.current_analyzer_thread = self.opera_analyzer_thread
+            self.current_analyzer_worker = self.opera_analyzer_worker
+            self.current_analyzer_thread.start()
 
     def update_table_preview(self, idx_elem, tot_elem, key_hash, key_data, content_type, creation_time):
         """Slot for "signal_update_table_preview" from "chrome_analyzer_worker".
@@ -550,7 +580,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.table_analysis_preview.scrollToBottom()
 
         # Copying "cache_entries_list" from "chrome_analyzer_thread" to avoid rescan for html export (if any)
-        self.list_found_cache_entries = self.chrome_analyzer_worker.list_cache_entries[:]
+        self.list_found_cache_entries = self.current_analyzer_worker.list_cache_entries[:]
 
         # "ProgressBar_analysis" value
         value = float(100 * len(self.list_found_cache_entries)) / float(tot_elem)
@@ -599,7 +629,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         :return: nothing
         """
 
-        self.chrome_analyzer_worker.signal_stop.set()
+        self.current_analyzer_worker.signal_stop.set()
 
     def analysis_terminated(self):
         """Slot for signal "finished" from "chrome_analyzer_thread".
@@ -614,7 +644,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         browser_name = self.selection_table_installed_browsers[0].text()
 
         # Analysis stopped by user
-        if self.chrome_analyzer_worker.stopped_by_user:
+        if self.current_analyzer_worker.stopped_by_user:
             QtGui.QMessageBox.warning(
                 QtGui.QMessageBox(), "Analysis stopped",
                 "Analysis for {browser} stopped by user".format(browser=browser_name),
@@ -625,7 +655,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             self.button_analysis_screen_back.setEnabled(True)
             self.button_stop_analysis.setEnabled(False)
             self.button_quit_analysis_screen.setEnabled(True)
-            
+
         # Analysis normal termination
         else:
             QtGui.QMessageBox.information(
@@ -694,30 +724,63 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             export_md5 = utils.create_random_hash()['random_md5']
             export_sha1 = utils.create_random_hash()['random_sha1']
 
-            # Analyzer thread and worker
-            self.chrome_exporter_thread = QtCore.QThread()
-            self.chrome_exporter_worker = chrome.chrome_exporter.ChromeExporter(
-                input_path=self.current_input_path,
-                export_path=self.current_export_path,
-                export_folder_name=export_folder_name,
-                entries_to_export=self.list_found_cache_entries,
-                browser_info=self.selection_table_installed_browsers,
-                browser_def_path=self.default_cache_path,
-                export_md5=export_md5,
-                export_sha1=export_sha1
-            )
+            # Chrome threads
+            if self.matching_browser_key == "chrome":
+                # Analyzer thread and worker
+                self.chrome_exporter_thread = QtCore.QThread()
+                self.chrome_exporter_worker = chrome.chrome_exporter.ChromeExporter(
+                    input_path=self.current_input_path,
+                    export_path=self.current_export_path,
+                    export_folder_name=export_folder_name,
+                    entries_to_export=self.list_found_cache_entries,
+                    browser_info=self.selection_table_installed_browsers,
+                    browser_def_path=self.default_cache_path,
+                    export_md5=export_md5,
+                    export_sha1=export_sha1
+                )
 
-            self.chrome_exporter_worker.moveToThread(self.chrome_exporter_thread)
+                self.chrome_exporter_worker.moveToThread(self.chrome_exporter_thread)
 
-            # Analyzer thread and worker signals connections
-            self.chrome_exporter_thread.started.connect(self.chrome_exporter_worker.exporter)
-            self.chrome_exporter_worker.signal_finished.connect(self.chrome_exporter_thread.quit)
-            self.chrome_exporter_worker.signal_finished.connect(self.chrome_exporter_worker.deleteLater)
-            self.chrome_exporter_thread.finished.connect(self.chrome_exporter_thread.deleteLater)
-            self.chrome_exporter_worker.signal_update_export.connect(self.update_export_progress)
-            self.chrome_exporter_thread.finished.connect(self.export_terminated)
-            self.chrome_exporter_worker.signal_enable_stop_button.connect(self.enable_stop_export_button)
-            self.chrome_exporter_thread.start()
+                # Analyzer thread and worker signals connections
+                self.chrome_exporter_thread.started.connect(self.chrome_exporter_worker.exporter)
+                self.chrome_exporter_worker.signal_finished.connect(self.chrome_exporter_thread.quit)
+                self.chrome_exporter_worker.signal_finished.connect(self.chrome_exporter_worker.deleteLater)
+                self.chrome_exporter_thread.finished.connect(self.chrome_exporter_thread.deleteLater)
+                self.chrome_exporter_worker.signal_update_export.connect(self.update_export_progress)
+                self.chrome_exporter_thread.finished.connect(self.export_terminated)
+                self.chrome_exporter_worker.signal_enable_stop_button.connect(self.enable_stop_export_button)
+                self.current_exporter_thread = self.chrome_exporter_thread
+                self.current_exporter_worker = self.chrome_exporter_worker
+                self.current_exporter_thread.start()
+
+            # Opera threads
+            elif self.matching_browser_key == "opera":
+                # Analyzer thread and worker
+                self.opera_exporter_thread = QtCore.QThread()
+                self.opera_exporter_worker = opera.opera_exporter.OperaExporter(
+                    input_path=self.current_input_path,
+                    export_path=self.current_export_path,
+                    export_folder_name=export_folder_name,
+                    entries_to_export=self.list_found_cache_entries,
+                    browser_info=self.selection_table_installed_browsers,
+                    browser_def_path=self.default_cache_path,
+                    export_md5=export_md5,
+                    export_sha1=export_sha1
+                )
+
+                self.opera_exporter_worker.moveToThread(self.opera_exporter_thread)
+
+                # Analyzer thread and worker signals connections
+                self.opera_exporter_thread.started.connect(self.opera_exporter_worker.exporter)
+                self.opera_exporter_worker.signal_finished.connect(self.opera_exporter_thread.quit)
+                self.opera_exporter_worker.signal_finished.connect(self.opera_exporter_worker.deleteLater)
+                self.opera_exporter_thread.finished.connect(self.opera_exporter_thread.deleteLater)
+                self.opera_exporter_worker.signal_update_export.connect(self.update_export_progress)
+                self.opera_exporter_thread.finished.connect(self.export_terminated)
+                self.opera_exporter_worker.signal_enable_stop_button.connect(self.enable_stop_export_button)
+                self.current_exporter_thread = self.opera_exporter_thread
+                self.current_exporter_worker = self.opera_exporter_worker
+                self.current_exporter_thread.start()
 
         # Not selected output path for export
         else:
@@ -750,7 +813,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         :return: nothing
         """
 
-        self.chrome_exporter_worker.signal_stop.set()
+        self.current_exporter_worker.signal_stop.set()
 
     def export_terminated(self):
         """Slot for signal "finished" from "chrome_exporter_thread".
@@ -762,7 +825,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         browser_name = self.selection_table_installed_browsers[0].text()
 
         # Analysis stopped by user
-        if self.chrome_exporter_worker.stopped_by_user:
+        if self.current_exporter_worker.stopped_by_user:
             QtGui.QMessageBox.warning(
                 QtGui.QMessageBox(), "Export stopped",
                 "Export for {browser} stopped by user".format(browser=browser_name),
@@ -816,7 +879,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         """
 
         # Analysis is still running
-        if self.chrome_analyzer_worker and self.chrome_analyzer_worker.worker_is_running:
+        if self.current_analyzer_worker and self.current_analyzer_worker.worker_is_running:
             browser_name = self.selection_table_installed_browsers[0].text()
 
             # Asking for closing on running analysis
@@ -831,7 +894,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                 self.deleteLater()
 
         # Export is still running
-        elif self.chrome_exporter_worker and self.chrome_exporter_worker.worker_is_running:
+        elif self.current_exporter_worker and self.current_exporter_worker.worker_is_running:
             browser_name = self.selection_table_installed_browsers[0].text()
 
             # Asking for closing on running export
