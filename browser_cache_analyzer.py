@@ -15,8 +15,8 @@ import shutil
 from gui import bca_converted_gui
 from operating_systems import windows
 from utilities import utils, browsers_utils
-from browsers import chrome, opera
-from gui.browsers_dialogs import chrome_preview_dialog
+import browsers
+from gui import browsers_dialogs
 
 
 class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheAnalyzerGuiClass):
@@ -105,8 +105,6 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.line_input_path_analysis.setFrame(False)
 
         #  "Table_analysis_preview"
-        self.table_analysis_preview.setColumnCount(4)
-        self.table_analysis_preview.setHorizontalHeaderLabels(['Key Hash', 'Key URL', 'Content Type', 'Creation Time'])
         self.table_analysis_preview.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.table_analysis_preview.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.table_analysis_preview.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
@@ -158,8 +156,8 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.list_found_cache_entries = []
         # Clipboard to store copied values
         self.clipboard = None
-        # QDialog for chrome advanced info on items in "table_analysis_preview"
-        self.chrome_preview_dialog = None
+        # QDialog for advanced info on items in "table_analysis_preview"
+        self.browser_preview_dialog = None
         # Context menu on "table_analysis_preview" during analysis
         self.context_menu_enabled = False
 
@@ -168,6 +166,11 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.chrome_analyzer_worker = None
         self.chrome_exporter_thread = None
         self.chrome_exporter_worker = None
+
+        self.firefox_analyzer_thread = None
+        self.firefox_analyzer_worker = None
+        self.firefox_exporter_thread = None
+        self.firefox_exporter_worker = None
 
         self.opera_analyzer_thread = None
         self.opera_analyzer_worker = None
@@ -207,10 +210,14 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         self.button_quit_export_screen.clicked.connect(self.close_application)
         self.button_home.clicked.connect(self.set_browsers_screen)
 
+        self.set_welcome_screen()
+
 
 ###########################
 # SECTION: WELCOME SCREEN #
 ###########################
+
+    def set_welcome_screen(self):
 
         # Welcome screen settings
         self.stackedWidget.setCurrentIndex(0)
@@ -234,7 +241,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         """
 
         # Browsers screen settings
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(2)
         self.label_application_title.setVisible(True)
         self.label_application_icon.setVisible(True)
         self.groupBox_system_info.setVisible(True)
@@ -308,9 +315,9 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             browser_install_path = self.selection_table_installed_browsers[2].text()
 
             # Matching key for selected browser
-            browser_default_path = browsers_utils.get_default_cache_path(browser_name=browser_name)
-            self.matching_browser_key = browser_default_path['matching_browser_key']
-            self.default_cache_path = browser_default_path['default_cache_path']
+            browser_info_path = browsers_utils.get_default_cache_path(browser_name=browser_name)
+            self.matching_browser_key = browser_info_path['matching_browser_key']
+            self.default_cache_path = browser_info_path['default_cache_path']
 
             # Processes for selected browser
             browser_process = browsers_utils.check_open_browser(self.matching_browser_key)
@@ -335,7 +342,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             # Selected browser is not open
             else:
                 # Input screen settings"
-                self.stackedWidget.setCurrentIndex(2)
+                self.stackedWidget.setCurrentIndex(3)
                 self.groupBox_selected_browser_info.setVisible(True)
 
                 # Already visited "input screen" from "browser screen"
@@ -425,8 +432,8 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                 # Setting "current input path" as selected path from QDialog
                 self.current_input_path = dialog_input_path
 
-                self.line_analysis_input_path.setText(self.current_input_path.replace("/", "\\"))
-                self.line_analysis_input_path.home(False)
+                self.line_input_path_folder_screen.setText(self.current_input_path.replace("/", "\\"))
+                self.line_input_path_folder_screen.home(False)
             # Selected path to analyze is not correct
 
             else:
@@ -493,7 +500,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
         except Exception as _:
             QtGui.QMessageBox.critical(
-                QtGui.QMessageBox(), "Error", "Unable to open file <br> {item}".format(item=selected_item),
+                QtGui.QMessageBox(), "Error", "Unable to open file <br> ''{item}''".format(item=selected_item),
                 QtGui.QMessageBox.Ok
             )
 
@@ -508,7 +515,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         :return: nothing
         """
 
-        self.stackedWidget.setCurrentIndex(3)
+        self.stackedWidget.setCurrentIndex(4)
 
         # Already visited "analysis screen"
         self.progressBar_analysis.reset()
@@ -525,9 +532,16 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
         # Chrome threads
         if self.matching_browser_key == "chrome":
+            # Columns and header for "table_analysis_preview"
+            self.table_analysis_preview.setColumnCount(4)
+            self.table_analysis_preview.setHorizontalHeaderLabels(
+                ['Key Hash', 'Key URL', 'Content Type', 'Creation Time'])
+
             # Analyzer thread and worker
             self.chrome_analyzer_thread = QtCore.QThread()
-            self.chrome_analyzer_worker = chrome.chrome_analyzer.ChromeAnalyzer(input_path=self.current_input_path)
+            self.chrome_analyzer_worker = browsers.chrome.chrome_analyzer.ChromeAnalyzer(
+                input_path=self.current_input_path
+            )
             self.chrome_analyzer_worker.moveToThread(self.chrome_analyzer_thread)
 
             # Analyzer thread and worker signals connections
@@ -541,11 +555,42 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             self.current_analyzer_worker = self.chrome_analyzer_worker
             self.current_analyzer_thread.start()
 
+        # Firefox threads
+        elif self.matching_browser_key == "firefox":
+            # Columns and header for "table_analysis_preview"
+            self.table_analysis_preview.setColumnCount(3)
+            self.table_analysis_preview.setHorizontalHeaderLabels(['Key Hash', 'URI', 'Expire Date'])
+
+            # Analyzer thread and worker
+            self.firefox_analyzer_thread = QtCore.QThread()
+            self.firefox_analyzer_worker = browsers.firefox.firefox_analyzer.FirefoxAnalyzer(
+                input_path=self.current_input_path
+            )
+            self.firefox_analyzer_worker.moveToThread(self.firefox_analyzer_thread)
+
+            # Analyzer thread and worker signals connections
+            self.firefox_analyzer_thread.started.connect(self.firefox_analyzer_worker.analyze_cache)
+            self.firefox_analyzer_worker.signal_finished.connect(self.firefox_analyzer_thread.quit)
+            self.firefox_analyzer_worker.signal_finished.connect(self.firefox_analyzer_worker.deleteLater)
+            self.firefox_analyzer_thread.finished.connect(self.firefox_analyzer_thread.deleteLater)
+            self.firefox_analyzer_thread.finished.connect(self.analysis_terminated)
+            self.firefox_analyzer_worker.signal_update_table_preview.connect(self.update_table_preview)
+            self.current_analyzer_thread = self.firefox_analyzer_thread
+            self.current_analyzer_worker = self.firefox_analyzer_worker
+            self.current_analyzer_thread.start()
+
         # Opera threads
         elif self.matching_browser_key == "opera":
+            # Columns and header for "table_analysis_preview"
+            self.table_analysis_preview.setColumnCount(4)
+            self.table_analysis_preview.setHorizontalHeaderLabels(
+                ['Key Hash', 'Key URL', 'Content Type', 'Creation Time'])
+
             # Analyzer thread and worker
             self.opera_analyzer_thread = QtCore.QThread()
-            self.opera_analyzer_worker = opera.opera_analyzer.OperaAnalyzer(input_path=self.current_input_path)
+            self.opera_analyzer_worker = browsers.opera.opera_analyzer.OperaAnalyzer(
+                input_path=self.current_input_path
+            )
             self.opera_analyzer_worker.moveToThread(self.opera_analyzer_thread)
 
             # Analyzer thread and worker signals connections
@@ -559,7 +604,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             self.current_analyzer_worker = self.opera_analyzer_worker
             self.current_analyzer_thread.start()
 
-    def update_table_preview(self, idx_elem, tot_elem, key_hash, key_data, content_type, creation_time):
+    def update_table_preview(self, idx_elem, tot_elem, key_hash, *args):
         """Slot for "signal_update_table_preview" from "chrome_analyzer_worker".
         Updating table with results from "chroma_analyzer_worker"
         :param idx_elem: position of the element in list of found cache entry instances
@@ -570,13 +615,19 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         :param creation_time: cache entry creation time
         :return: nothing
         """
-
         # Cache entry values in "table analysis preview"
         self.table_analysis_preview.insertRow(idx_elem)
         self.table_analysis_preview.setItem(idx_elem, 0, QtGui.QTableWidgetItem(key_hash))
-        self.table_analysis_preview.setItem(idx_elem, 1, QtGui.QTableWidgetItem(key_data))
-        self.table_analysis_preview.setItem(idx_elem, 2, QtGui.QTableWidgetItem(content_type))
-        self.table_analysis_preview.setItem(idx_elem, 3, QtGui.QTableWidgetItem(creation_time))
+
+        if self.matching_browser_key in ["chrome", "opera"]:
+            self.table_analysis_preview.setItem(idx_elem, 1, QtGui.QTableWidgetItem(args[0]))
+            self.table_analysis_preview.setItem(idx_elem, 2, QtGui.QTableWidgetItem(args[1]))
+            self.table_analysis_preview.setItem(idx_elem, 3, QtGui.QTableWidgetItem(args[2]))
+
+        elif self.matching_browser_key == "firefox":
+            self.table_analysis_preview.setItem(idx_elem, 1, QtGui.QTableWidgetItem(args[0]))
+            self.table_analysis_preview.setItem(idx_elem, 2, QtGui.QTableWidgetItem(args[1]))
+
         self.table_analysis_preview.scrollToBottom()
 
         # Copying "cache_entries_list" from "chrome_analyzer_thread" to avoid rescan for html export (if any)
@@ -619,9 +670,22 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                 current_table_row = self.table_analysis_preview.currentRow()
                 current_result_item = self.list_found_cache_entries[current_table_row]
 
-                # File preview
-                self.chrome_preview_dialog = chrome_preview_dialog.ChromePreviewDialog(item=current_result_item)
-                self.chrome_preview_dialog.exec_()
+                # Entry preview
+                if self.matching_browser_key == "chrome":
+                    self.browser_preview_dialog = browsers_dialogs.chrome_preview_dialog.ChromePreviewDialog(
+                        entry=current_result_item
+                    )
+
+                elif self.matching_browser_key == "firefox":
+                    self.browser_preview_dialog = browsers_dialogs.firefox_preview_dialog.FirefoxPreviewDialog(
+                        entry=current_result_item
+                    )
+                elif self.matching_browser_key == "opera":
+                    self.browser_preview_dialog = browsers_dialogs.opera_preview_dialog.OperaPreviewDialog(
+                        entry=current_result_item
+                    )
+
+                self.browser_preview_dialog.exec_()
 
     def stop_analysis(self):
         """Slot for "button_stop_analysis" in "analysis screen".
@@ -694,7 +758,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         # Selected output path for export
         if self.current_export_path:
 
-            self.stackedWidget.setCurrentIndex(4)
+            self.stackedWidget.setCurrentIndex(5)
 
             # Export screen settings
             self.button_home.setEnabled(False)
@@ -726,9 +790,9 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
             # Chrome threads
             if self.matching_browser_key == "chrome":
-                # Analyzer thread and worker
+                # Exporter thread and worker
                 self.chrome_exporter_thread = QtCore.QThread()
-                self.chrome_exporter_worker = chrome.chrome_exporter.ChromeExporter(
+                self.chrome_exporter_worker = browsers.chrome.chrome_exporter.ChromeExporter(
                     input_path=self.current_input_path,
                     export_path=self.current_export_path,
                     export_folder_name=export_folder_name,
@@ -741,7 +805,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
                 self.chrome_exporter_worker.moveToThread(self.chrome_exporter_thread)
 
-                # Analyzer thread and worker signals connections
+                # Exporter thread and worker signals connections
                 self.chrome_exporter_thread.started.connect(self.chrome_exporter_worker.exporter)
                 self.chrome_exporter_worker.signal_finished.connect(self.chrome_exporter_thread.quit)
                 self.chrome_exporter_worker.signal_finished.connect(self.chrome_exporter_worker.deleteLater)
@@ -753,11 +817,39 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                 self.current_exporter_worker = self.chrome_exporter_worker
                 self.current_exporter_thread.start()
 
+            elif self.matching_browser_key == "firefox":
+                # Exporter thread and worker
+                self.firefox_exporter_thread = QtCore.QThread()
+                self.firefox_exporter_worker = browsers.firefox.firefox_exporter.FirefoxExporter(
+                    input_path=self.current_input_path,
+                    export_path=self.current_export_path,
+                    export_folder_name=export_folder_name,
+                    entries_to_export=self.list_found_cache_entries,
+                    browser_info=self.selection_table_installed_browsers,
+                    browser_def_path=self.default_cache_path,
+                    export_md5=export_md5,
+                    export_sha1=export_sha1
+                )
+
+                self.firefox_exporter_worker.moveToThread(self.firefox_exporter_thread)
+
+                # Exporter thread and worker signals connections
+                self.firefox_exporter_thread.started.connect(self.firefox_exporter_worker.exporter)
+                self.firefox_exporter_worker.signal_finished.connect(self.firefox_exporter_thread.quit)
+                self.firefox_exporter_worker.signal_finished.connect(self.firefox_exporter_worker.deleteLater)
+                self.firefox_exporter_thread.finished.connect(self.firefox_exporter_thread.deleteLater)
+                self.firefox_exporter_worker.signal_update_export.connect(self.update_export_progress)
+                self.firefox_exporter_thread.finished.connect(self.export_terminated)
+                self.firefox_exporter_worker.signal_enable_stop_button.connect(self.enable_stop_export_button)
+                self.current_exporter_thread = self.firefox_exporter_thread
+                self.current_exporter_worker = self.firefox_exporter_worker
+                self.current_exporter_thread.start()
+
             # Opera threads
             elif self.matching_browser_key == "opera":
-                # Analyzer thread and worker
+                # Exporter thread and worker
                 self.opera_exporter_thread = QtCore.QThread()
-                self.opera_exporter_worker = opera.opera_exporter.OperaExporter(
+                self.opera_exporter_worker = browsers.opera.opera_exporter.OperaExporter(
                     input_path=self.current_input_path,
                     export_path=self.current_export_path,
                     export_folder_name=export_folder_name,
@@ -770,7 +862,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
                 self.opera_exporter_worker.moveToThread(self.opera_exporter_thread)
 
-                # Analyzer thread and worker signals connections
+                # Exporter thread and worker signals connections
                 self.opera_exporter_thread.started.connect(self.opera_exporter_worker.exporter)
                 self.opera_exporter_worker.signal_finished.connect(self.opera_exporter_thread.quit)
                 self.opera_exporter_worker.signal_finished.connect(self.opera_exporter_worker.deleteLater)

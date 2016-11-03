@@ -5,13 +5,13 @@
 from PyQt4 import QtGui, QtCore
 
 # Project imports
-import cpd_converted_gui
+import opd_converted_gui
 
 
-class ChromePreviewDialog(QtGui.QDialog, cpd_converted_gui.Ui_ChromePreviewDialog):
+class OperaPreviewDialog(QtGui.QDialog, opd_converted_gui.Ui_OperaPreviewDialog):
 
     def __init__(self, parent=None, entry=None):
-        super(ChromePreviewDialog, self).__init__(parent)
+        super(OperaPreviewDialog, self).__init__(parent)
 
         # Setting up the application user interface from python converted gui
         self.setupUi(self)

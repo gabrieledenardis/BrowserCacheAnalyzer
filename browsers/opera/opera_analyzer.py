@@ -32,7 +32,7 @@ class OperaAnalyzer(QtCore.QObject):
         # Thread stopped by user
         self.stopped_by_user = False
         # Analysis running
-        self.worker_is_running = False
+        self.worker_is_running = True
         # Input path to analyze
         self.input_path = input_path
         # List of all cache entries found
@@ -56,8 +56,7 @@ class OperaAnalyzer(QtCore.QObject):
 
             # Addresses table in "index" file
             for addresses in range(table_size):
-                # Analysis is running
-                self.worker_is_running = True
+
                 # "Button_stop_analysis" clicked
                 if self.signal_stop.is_set():
                     self.stopped_by_user = True
@@ -85,32 +84,18 @@ class OperaAnalyzer(QtCore.QObject):
                     # If an entry has a valid next entry address (an entry with the same hash),
                     # adding it to the entries list. Those entries are not in index table addresses
                     while cache_entry_instance.next_entry_address != 0:
-                        if (cache_entry_instance.data_stream_addresses[0] and
+                        if (cache_entry_instance.data_stream_addresses[0] is not None and
                                 isinstance(cache_entry_instance.data_stream_addresses[0].resource_data, dict)):
 
-                            # "Content-Type" in HTTP header
-                            if "Content-Type" in cache_entry_instance.data_stream_addresses[0].resource_data:
-                                # Updating "table_analysis_preview"
-                                self.signal_update_table_preview.emit(
-                                    len(self.list_cache_entries) - 1,
-                                    num_entries,
-                                    str(cache_entry_instance.key_hash),
-                                    cache_entry_instance.key_data,
-                                    cache_entry_instance.data_stream_addresses[0].resource_data['Content-Type'],
-                                    cache_entry_instance.creation_time
-                                )
-
-                            # "Content-Type" not in HTTP header
-                            else:
-                                # Updating "table_analysis_preview"
-                                self.signal_update_table_preview.emit(
-                                    len(self.list_cache_entries)-1,
-                                    num_entries,
-                                    str(cache_entry_instance.key_hash),
-                                    cache_entry_instance.key_data,
-                                    " - ",
-                                    cache_entry_instance.creation_time
-                                )
+                            # Updating "table_analysis_preview"
+                            self.signal_update_table_preview.emit(
+                                len(self.list_cache_entries) - 1,
+                                num_entries,
+                                str(cache_entry_instance.key_hash),
+                                cache_entry_instance.key_data,
+                                cache_entry_instance.data_stream_addresses[0].resource_data.get('Content-Type', '-'),
+                                cache_entry_instance.creation_time
+                            )
 
                         # Not HTTP Header
                         else:
@@ -146,43 +131,29 @@ class OperaAnalyzer(QtCore.QObject):
                     # Updating "list_cache_entries"
                     self.list_cache_entries.append(cache_entry_instance)
 
-                    # Resuming in addresses table
-                    if (cache_entry_instance.data_stream_addresses[0] and
+                    # Resuming addresses table
+                    if (cache_entry_instance.data_stream_addresses[0] is not None and
                             isinstance(cache_entry_instance.data_stream_addresses[0].resource_data, dict)):
 
-                            # "Content-Type" in HTTP header
-                            if "Content-Type" in cache_entry_instance.data_stream_addresses[0].resource_data:
-                                # Updating "table_analysis_preview"
-                                self.signal_update_table_preview.emit(
-                                    len(self.list_cache_entries)-1,
-                                    num_entries,
-                                    str(cache_entry_instance.key_hash),
-                                    cache_entry_instance.key_data,
-                                    cache_entry_instance.data_stream_addresses[0].resource_data['Content-Type'],
-                                    cache_entry_instance.creation_time
-                                )
-
-                            # "Content-Type" not in HTTP header
-                            else:
-                                # Updating "table_analysis_preview"
-                                self.signal_update_table_preview.emit(
-                                    len(self.list_cache_entries)-1,
-                                    num_entries,
-                                    str(cache_entry_instance.key_hash),
-                                    cache_entry_instance.key_data,
-                                    " - ",
-                                    cache_entry_instance.creation_time
-                                )
+                        # Updating "table_analysis_preview"
+                        self.signal_update_table_preview.emit(
+                            len(self.list_cache_entries) - 1,
+                            num_entries,
+                            str(cache_entry_instance.key_hash),
+                            cache_entry_instance.key_data,
+                            cache_entry_instance.data_stream_addresses[0].resource_data.get('Content-Type', '-'),
+                            cache_entry_instance.creation_time
+                        )
 
                     # Not HTTP Header
                     else:
                         # Updating "table_analysis_preview"
                         self.signal_update_table_preview.emit(
-                            len(self.list_cache_entries)-1,
+                            len(self.list_cache_entries) - 1,
                             num_entries,
                             str(cache_entry_instance.key_hash),
                             cache_entry_instance.key_data,
-                            " - ",
+                            "-",
                             cache_entry_instance.creation_time
                         )
 

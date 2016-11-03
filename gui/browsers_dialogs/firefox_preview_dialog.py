@@ -5,13 +5,13 @@
 from PyQt4 import QtGui, QtCore
 
 # Project imports
-import cpd_converted_gui
+import fpd_converted_gui
 
 
-class ChromePreviewDialog(QtGui.QDialog, cpd_converted_gui.Ui_ChromePreviewDialog):
+class FirefoxPreviewDialog(QtGui.QDialog, fpd_converted_gui.Ui_FirefoxPreviewDialog):
 
     def __init__(self, parent=None, entry=None):
-        super(ChromePreviewDialog, self).__init__(parent)
+        super(FirefoxPreviewDialog, self).__init__(parent)
 
         # Setting up the application user interface from python converted gui
         self.setupUi(self)
@@ -40,18 +40,13 @@ class ChromePreviewDialog(QtGui.QDialog, cpd_converted_gui.Ui_ChromePreviewDialo
 #######################
 
         # Values for selected item
-        self.label_dialog_title.setText(str(entry.key_hash))
-        self.line_key_hash.setText(str(entry.key_hash))
-        self.line_next_entry_address.setText(str(entry.next_entry_address))
-        self.line_reuse_count.setText(str(entry.reuse_count))
-        self.line_refetch_count.setText(str(entry.refetch_count))
-        self.line_entry_state.setText(str(entry.entry_state))
-        self.line_creation_time.setText(str(entry.creation_time))
-        self.line_key_data_size.setText(str(entry.key_data_size))
-        self.line_long_key_address.setText(str(entry.long_key_data_address))
-        self.line_cache_entry_flags.setText(str(entry.cache_entry_flags))
-        self.line_key_data.setText(str(entry.key_data))
-        self.line_key_data.home(False)
+        self.label_dialog_title.setText(str(entry.url_hash))
+        self.line_url_hash.setText(str(entry.url_hash))
+        self.line_frequency.setText(str(entry.frequency))
+        self.line_expiration_date.setText(str(entry.expire_date))
+        self.line_app_id.setText(str(entry.app_id))
+        self.line_flags.setText(str(entry.flags))
+        self.line_file_size.setText(str(entry.file_size))
 
         # Mouse cursor coordinates on left click over the dialog
         self.mouse_press_position = None

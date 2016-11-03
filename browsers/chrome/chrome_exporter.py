@@ -388,7 +388,7 @@ class ChromeExporter(QtCore.QObject):
             """.format(
                 idx=format(idx, "02"),
                 file_entry_html=entry_name + ".html",
-                hash=entry.key_hash,
+                hash=entry.key_hash
             )
 
             # Columns "Content Type" and "Creation Time"

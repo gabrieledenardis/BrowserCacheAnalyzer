@@ -13,5 +13,8 @@
     <file>icons/button_power.png</file>
     <file>icons/home.png</file>
     <file>icons/open_folder.png</file>
+    <file>icons/chrome_96x96.png</file>
+    <file>icons/firefox_96x96.png</file>
+    <file>icons/opera_96x96.png</file>
 </qresource>
 </RCC>

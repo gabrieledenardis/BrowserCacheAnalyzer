@@ -10,19 +10,9 @@ import psutil
 # Browsers will be referred as in this list to avoid any mismatch with names within the application.
 USER_INSTALLED_BROWSERS = ["chrome", "firefox", "opera"]
 
-# Browsers cache default paths
-BROWSERS_DEFAULT_CACHE_PATHS = {
-
-    ("chrome", "windows", "10"): os.path.join(
-        "C:", os.sep, "Users", unicode(os.environ['USERNAME']), "AppData", "Local", "Google", "Chrome", "User Data",
-        "Default", "Cache"
-    ),
-
-    ("opera", "windows", "10"): os.path.join(
-        "C:", os.sep, "Users", unicode(os.environ['USERNAME']), "AppData", "Local", "Opera Software", "Opera Stable",
-        "Cache"
-    )
-}
+# Firefox profile folder (This folder contains an user folder with a random identifier name)
+# TODO: firefox folder name
+FIREFOX_PROFILE_FOLDER = "C:\\Users\\Gabriele\\AppData\\Local\\Mozilla\\Firefox\\Profiles"
 
 
 def check_open_browser(browser=None):
@@ -73,6 +63,20 @@ def get_default_cache_path(browser_name=None):
     return results
 
 
+def get_firefox_default_cache_path():
+    firefox_cache_path = None
+
+    for root, dirs, files in os.walk(FIREFOX_PROFILE_FOLDER):
+        for subdir in dirs:
+            if subdir == "cache2":
+                cache_2_path = os.path.join(root, subdir)
+                for f in os.listdir(cache_2_path):
+                    if f == "index":
+                        firefox_cache_path = cache_2_path
+
+    return firefox_cache_path
+
+
 def check_valid_cache_path(browser=None, cache_path=None):
     """Checking if a selected cache path is valid for selected browser.
     To be considered valid, a path must contain specific files (according to the browser).
@@ -93,6 +97,24 @@ def check_valid_cache_path(browser=None, cache_path=None):
             # Not all files in "chrome_files" are in cache folder
             return False
 
+        # Firefox
+        elif browser == "firefox":
+            entries_folder_present = False
+            # Searching "entries" folder
+            for root, dirs, files in os.walk(cache_path):
+                for subdir in dirs:
+                    if subdir == "entries":
+                        entries_folder_present = True
+                        break
+
+            # "Index" file and "entries" sub folder in cache folder
+            if "index" in os.listdir(cache_path) and entries_folder_present:
+                return True
+
+            # "Index" file and "entries" sub folder not in cache folder
+            else:
+                return False
+
         # Opera
         elif browser == "opera":
             # Chrome index and data_ files
@@ -105,3 +127,20 @@ def check_valid_cache_path(browser=None, cache_path=None):
     # Not existing path
     else:
         return False
+
+
+# Browsers cache default paths
+BROWSERS_DEFAULT_CACHE_PATHS = {
+
+    ("chrome", "windows", "10"): os.path.join(
+        "C:", os.sep, "Users", unicode(os.environ['USERNAME']), "AppData", "Local", "Google", "Chrome", "User Data",
+        "Default", "Cache"
+    ),
+
+    ("firefox", "windows", "10"): get_firefox_default_cache_path(),
+
+    ("opera", "windows", "10"): os.path.join(
+        "C:", os.sep, "Users", unicode(os.environ['USERNAME']), "AppData", "Local", "Opera Software", "Opera Stable",
+        "Cache"
+    )
+}
