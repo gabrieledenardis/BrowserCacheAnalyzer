@@ -35,3 +35,4 @@ class CacheEntry(object):
         )
 
         self.resource_uri = self.cache_resource_instance.uri
+        self.resource_http_header = self.cache_resource_instance.http_header

@@ -426,9 +426,16 @@ class FirefoxExporter(QtCore.QObject):
                     <h3> Header </h3>
                     <p> {header} </p>
                     """.format(
-                        header=entry.cache_resource_instance.header
+                        header=entry.cache_resource_instance.http_header
                     )
 
+                    html_string_file_entry_header += """
+                    <hr>
+                    <h3> Raw header </h3>
+                    <p> {header} </p>
+                    """.format(
+                        header=entry.cache_resource_instance.raw_http_header
+                    )
                     # Copying resource
                     entry_to_copy = os.path.join(entries_path, entry.url_hash)
 

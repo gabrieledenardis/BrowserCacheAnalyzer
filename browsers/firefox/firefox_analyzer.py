@@ -21,7 +21,7 @@ class FirefoxAnalyzer(QtCore.QObject):
     """
 
     # Signals
-    signal_update_table_preview = QtCore.pyqtSignal(int, int, str, str, str)
+    signal_update_table_preview = QtCore.pyqtSignal(int, int, str, str, str, str)
     signal_finished = QtCore.pyqtSignal()
 
     def __init__(self, parent=None, input_path=None):
@@ -97,14 +97,14 @@ class FirefoxAnalyzer(QtCore.QObject):
                     time.sleep(0.01)
 
                     resource_uri = cache_entry_instance.resource_uri
+                    resource_http_header = cache_entry_instance.resource_http_header
                     if resource_uri:
-                        # start = resource_uri.index("h")
-                        # resource_uri = resource_uri[start:]
                         self.signal_update_table_preview.emit(
                             len(self.list_cache_entries),
                             tot_elem,
                             cache_entry_instance.url_hash,
                             resource_uri,
+                            resource_http_header,
                             cache_entry_instance.expire_date
                         )
                     else:
@@ -112,7 +112,8 @@ class FirefoxAnalyzer(QtCore.QObject):
                             len(self.list_cache_entries),
                             tot_elem,
                             cache_entry_instance.url_hash,
-                            "-",
+                            "None",
+                            "None",
                             cache_entry_instance.expire_date
                         )
 
@@ -121,4 +122,3 @@ class FirefoxAnalyzer(QtCore.QObject):
         # Analysis terminated
         self.worker_is_running = False
         self.signal_finished.emit()
-        print len (self.list_cache_entries)

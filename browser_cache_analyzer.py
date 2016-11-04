@@ -558,8 +558,8 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         # Firefox threads
         elif self.matching_browser_key == "firefox":
             # Columns and header for "table_analysis_preview"
-            self.table_analysis_preview.setColumnCount(3)
-            self.table_analysis_preview.setHorizontalHeaderLabels(['Key Hash', 'URI', 'Expire Date'])
+            self.table_analysis_preview.setColumnCount(4)
+            self.table_analysis_preview.setHorizontalHeaderLabels(['Key Hash', 'URI', 'Content-Type', 'Expire Date'])
 
             # Analyzer thread and worker
             self.firefox_analyzer_thread = QtCore.QThread()
@@ -604,7 +604,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             self.current_analyzer_worker = self.opera_analyzer_worker
             self.current_analyzer_thread.start()
 
-    def update_table_preview(self, idx_elem, tot_elem, key_hash, *args):
+    def update_table_preview(self, idx_elem, tot_elem, key_hash, key_url, content_type, time):
         """Slot for "signal_update_table_preview" from "chrome_analyzer_worker".
         Updating table with results from "chroma_analyzer_worker"
         :param idx_elem: position of the element in list of found cache entry instances
@@ -618,15 +618,9 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         # Cache entry values in "table analysis preview"
         self.table_analysis_preview.insertRow(idx_elem)
         self.table_analysis_preview.setItem(idx_elem, 0, QtGui.QTableWidgetItem(key_hash))
-
-        if self.matching_browser_key in ["chrome", "opera"]:
-            self.table_analysis_preview.setItem(idx_elem, 1, QtGui.QTableWidgetItem(args[0]))
-            self.table_analysis_preview.setItem(idx_elem, 2, QtGui.QTableWidgetItem(args[1]))
-            self.table_analysis_preview.setItem(idx_elem, 3, QtGui.QTableWidgetItem(args[2]))
-
-        elif self.matching_browser_key == "firefox":
-            self.table_analysis_preview.setItem(idx_elem, 1, QtGui.QTableWidgetItem(args[0]))
-            self.table_analysis_preview.setItem(idx_elem, 2, QtGui.QTableWidgetItem(args[1]))
+        self.table_analysis_preview.setItem(idx_elem, 1, QtGui.QTableWidgetItem(key_url))
+        self.table_analysis_preview.setItem(idx_elem, 2, QtGui.QTableWidgetItem(content_type))
+        self.table_analysis_preview.setItem(idx_elem, 3, QtGui.QTableWidgetItem(time))
 
         self.table_analysis_preview.scrollToBottom()
 
