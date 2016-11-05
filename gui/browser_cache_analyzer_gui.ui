@@ -33,6 +33,135 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_6">
+    <item row="2" column="0">
+     <widget class="QGroupBox" name="groupBox_system_info">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>300</width>
+        <height>150</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>300</width>
+        <height>150</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Open Sans</family>
+        <pointsize>13</pointsize>
+       </font>
+      </property>
+      <property name="title">
+       <string>System info</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>System / OS name:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="line_system_os_name">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Release:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="line_system_release">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Release version:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="line_system_release_version">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Hostname:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="line_system_hostname">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
     <item row="2" column="1">
      <widget class="QGroupBox" name="groupBox_selected_browser_info">
       <property name="sizePolicy">
@@ -212,134 +341,21 @@
       </layout>
      </widget>
     </item>
-    <item row="2" column="0">
-     <widget class="QGroupBox" name="groupBox_system_info">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+    <item row="1" column="0">
+     <spacer name="verticalSpacer_8">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
       </property>
-      <property name="minimumSize">
+      <property name="sizeType">
+       <enum>QSizePolicy::Fixed</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
        <size>
-        <width>300</width>
-        <height>150</height>
+        <width>20</width>
+        <height>10</height>
        </size>
       </property>
-      <property name="maximumSize">
-       <size>
-        <width>300</width>
-        <height>150</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Open Sans</family>
-        <pointsize>13</pointsize>
-       </font>
-      </property>
-      <property name="title">
-       <string>System info</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label">
-           <property name="font">
-            <font>
-             <pointsize>9</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>System / OS name:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="line_system_os_name">
-           <property name="font">
-            <font>
-             <pointsize>9</pointsize>
-            </font>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_2">
-           <property name="font">
-            <font>
-             <pointsize>9</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Release:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="line_system_release">
-           <property name="font">
-            <font>
-             <pointsize>9</pointsize>
-            </font>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="font">
-            <font>
-             <pointsize>9</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Release version:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="line_system_release_version">
-           <property name="font">
-            <font>
-             <pointsize>9</pointsize>
-            </font>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="font">
-            <font>
-             <pointsize>9</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Hostname:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="line_system_hostname">
-           <property name="font">
-            <font>
-             <pointsize>9</pointsize>
-            </font>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
+     </spacer>
     </item>
     <item row="0" column="0" colspan="2">
      <layout class="QGridLayout" name="gridLayout">
@@ -507,33 +523,17 @@
       </item>
      </layout>
     </item>
-    <item row="1" column="0">
-     <spacer name="verticalSpacer_8">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeType">
-       <enum>QSizePolicy::Fixed</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>10</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
     <item row="3" column="0" colspan="2">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="page">
        <layout class="QGridLayout" name="gridLayout_10">
         <item row="3" column="0" colspan="3">
          <layout class="QGridLayout" name="gridLayout_9">
           <item row="0" column="2">
-           <widget class="QPushButton" name="button_search_browsers">
+           <widget class="QPushButton" name="button_search_installed_browsers">
             <property name="minimumSize">
              <size>
               <width>240</width>
@@ -809,6 +809,52 @@
        <layout class="QGridLayout" name="gridLayout_15">
         <item row="2" column="0">
          <layout class="QGridLayout" name="gridLayout_14">
+          <item row="0" column="2">
+           <widget class="QPushButton" name="button_portable_select_cache">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>160</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>160</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Open Sans</family>
+              <pointsize>9</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="layoutDirection">
+             <enum>Qt::RightToLeft</enum>
+            </property>
+            <property name="text">
+             <string>    Select cache folder</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons.qrc">
+              <normaloff>:/icons/arrow_right.png</normaloff>:/icons/arrow_right.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <spacer name="horizontalSpacer_12">
             <property name="orientation">
@@ -865,52 +911,6 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QPushButton" name="button_portable_screen_select">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>120</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>120</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <family>Open Sans</family>
-              <pointsize>9</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::RightToLeft</enum>
-            </property>
-            <property name="text">
-             <string>    Select folder</string>
-            </property>
-            <property name="icon">
-             <iconset resource="icons.qrc">
-              <normaloff>:/icons/arrow_right.png</normaloff>:/icons/arrow_right.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>24</width>
-              <height>24</height>
-             </size>
-            </property>
-           </widget>
-          </item>
          </layout>
         </item>
         <item row="0" column="0">
@@ -925,8 +925,21 @@
            <string>Portable available browsers</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_31">
-           <item row="1" column="0">
+           <item row="0" column="0" colspan="3">
             <layout class="QGridLayout" name="gridLayout_30">
+             <item row="0" column="2">
+              <spacer name="horizontalSpacer_18">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
              <item row="0" column="0">
               <widget class="QLabel" name="label_13">
                <property name="font">
@@ -937,30 +950,12 @@
                 </font>
                </property>
                <property name="text">
-                <string>Selected browser:</string>
+                <string>Selected portable browser:</string>
                </property>
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QLabel" name="label_portable_browser_selected">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>150</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>150</width>
-                 <height>16777215</height>
-                </size>
-               </property>
+              <widget class="QLabel" name="label_selected_portable">
                <property name="font">
                 <font>
                  <pointsize>9</pointsize>
@@ -973,7 +968,33 @@
              </item>
             </layout>
            </item>
-           <item row="3" column="1">
+           <item row="1" column="1">
+            <spacer name="verticalSpacer_18">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="2" column="0">
+            <spacer name="horizontalSpacer_14">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>254</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="2" column="1">
             <layout class="QGridLayout" name="gridLayout_29">
              <item row="0" column="2">
               <widget class="QPushButton" name="button_portable_firefox">
@@ -1020,14 +1041,14 @@
                </property>
                <property name="minimumSize">
                 <size>
-                 <width>64</width>
-                 <height>64</height>
+                 <width>96</width>
+                 <height>96</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>64</width>
-                 <height>64</height>
+                 <width>96</width>
+                 <height>96</height>
                 </size>
                </property>
                <property name="text">
@@ -1035,7 +1056,7 @@
                </property>
                <property name="icon">
                 <iconset resource="icons.qrc">
-                 <normaloff>:/icons/chrome_64x64.png</normaloff>:/icons/chrome_64x64.png</iconset>
+                 <normaloff>:/icons/chrome_96x96.png</normaloff>:/icons/chrome_96x96.png</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -1114,46 +1135,7 @@
              </item>
             </layout>
            </item>
-           <item row="2" column="0" colspan="3">
-            <spacer name="verticalSpacer_16">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>958</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="4" column="1">
-            <spacer name="verticalSpacer_17">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>51</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="3" column="0">
-            <spacer name="horizontalSpacer_14">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>254</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="3" column="2">
+           <item row="2" column="2">
             <spacer name="horizontalSpacer_15">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -1166,15 +1148,15 @@
              </property>
             </spacer>
            </item>
-           <item row="0" column="0" colspan="3">
-            <spacer name="verticalSpacer_18">
+           <item row="3" column="1">
+            <spacer name="verticalSpacer_17">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
                <width>20</width>
-               <height>40</height>
+               <height>51</height>
               </size>
              </property>
             </spacer>
@@ -1302,8 +1284,8 @@
         </item>
         <item row="2" column="0">
          <layout class="QGridLayout" name="gridLayout_12">
-          <item row="0" column="1">
-           <widget class="QPushButton" name="button_browsers_screen_select">
+          <item row="0" column="2">
+           <widget class="QPushButton" name="button_installed_select_cache">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -1360,6 +1342,43 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="button_back_installed_browsers">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Open Sans</family>
+              <pointsize>9</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Back    </string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons.qrc">
+              <normaloff>:/icons/arrow_left.png</normaloff>:/icons/arrow_left.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>

@@ -47,6 +47,8 @@ class FirefoxPreviewDialog(QtGui.QDialog, fpd_converted_gui.Ui_FirefoxPreviewDia
         self.line_app_id.setText(str(entry.app_id))
         self.line_flags.setText(str(entry.flags))
         self.line_file_size.setText(str(entry.file_size))
+        self.line_resource_uri.setText(str(entry.resource_uri))
+        self.line_resource_uri.home(False)
 
         # Mouse cursor coordinates on left click over the dialog
         self.mouse_press_position = None

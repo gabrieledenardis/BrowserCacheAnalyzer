@@ -82,10 +82,17 @@ class CacheResource(object):
                         .strftime("%A - %d %B %Y - %H:%M:%S")
 
                 self.key_length = struct.unpack(">I", f_hash.read(4))[0]
+
+                while True:
+                    c = f_hash.read(1)
+                    if c == "h":
+                        f_hash.seek(-1, 1)
+                        break
+
                 uri_raw = f_hash.read(self.key_length)
-                start = uri_raw.index("h")
-                uri_raw = uri_raw[start:]
+
                 self.uri = urllib.unquote(uri_raw)
+
 
                 self.raw_http_header = binascii.b2a_qp(f_hash.read())
                 self.http_header = header_content_type(self.raw_http_header)

@@ -29,7 +29,7 @@ class ChromeExporter(QtCore.QObject):
     signal_enable_stop_button = QtCore.pyqtSignal()
 
     def __init__(self, parent=None, input_path=None, export_path=None, export_folder_name=None, entries_to_export=None,
-                 browser_info=None, browser_def_path=None, export_md5=None, export_sha1=None):
+                 browser_portable=None, browser_info=None, browser_def_path=None, export_md5=None, export_sha1=None):
         super(ChromeExporter, self).__init__(parent)
 
         # Signal from "button_stop_export"
@@ -40,14 +40,21 @@ class ChromeExporter(QtCore.QObject):
         self.export_path = export_path
         self.export_folder_name = export_folder_name
         self.entries_to_export = entries_to_export
-        self.browser = browser_info[0].text()
-        self.browser_version = browser_info[1].text()
-        self.browser_inst_path = browser_info[2].text()
-        self.browser_def_path = browser_def_path
         self.export_md5 = export_md5
         self.export_sha1 = export_sha1
         self.stopped_by_user = False
         self.worker_is_running = False
+
+        if browser_portable:
+            self.browser = browser_info[0]
+            self.browser_version = browser_info[1]
+            self.browser_inst_path = browser_info[2]
+            self.browser_def_path = browser_def_path
+        else:
+            self.browser = browser_info[0].text()
+            self.browser_version = browser_info[1].text()
+            self.browser_inst_path = browser_info[2].text()
+            self.browser_def_path = browser_def_path
 
     def exporter(self):
 

@@ -10,6 +10,7 @@ import datetime
 import os
 import platform
 import shutil
+import binascii
 
 # Project imports
 from utilities import utils
@@ -28,7 +29,7 @@ class FirefoxExporter(QtCore.QObject):
     signal_enable_stop_button = QtCore.pyqtSignal()
 
     def __init__(self, parent=None, input_path=None, export_path=None, export_folder_name=None, entries_to_export=None,
-                 browser_info=None, browser_def_path=None, export_md5=None, export_sha1=None):
+                 browser_portable=None, browser_info=None, browser_def_path=None, export_md5=None, export_sha1=None):
         super(FirefoxExporter, self).__init__(parent)
 
         # Signal from "button_stop_export"
@@ -39,14 +40,22 @@ class FirefoxExporter(QtCore.QObject):
         self.export_path = export_path
         self.export_folder_name = export_folder_name
         self.entries_to_export = entries_to_export
-        self.browser = browser_info[0].text()
-        self.browser_version = browser_info[1].text()
-        self.browser_inst_path = browser_info[2].text()
-        self.browser_def_path = browser_def_path
         self.export_md5 = export_md5
         self.export_sha1 = export_sha1
         self.stopped_by_user = False
         self.worker_is_running = True
+
+
+        if browser_portable:
+            self.browser = browser_info[0]
+            self.browser_version = browser_info[1]
+            self.browser_inst_path = browser_info[2]
+            self.browser_def_path = browser_def_path
+        else:
+            self.browser = browser_info[0].text()
+            self.browser_version = browser_info[1].text()
+            self.browser_inst_path = browser_info[2].text()
+            self.browser_def_path = browser_def_path
 
 
     def exporter(self):
@@ -439,7 +448,6 @@ class FirefoxExporter(QtCore.QObject):
                     # Copying resource
                     entry_to_copy = os.path.join(entries_path, entry.url_hash)
 
-                    # print  entry_name + "-data"
                     shutil.copy(os.path.join(entries_path, entry.url_hash), file_entry + "-data")
 
                 #  Closing HTML file for the entry

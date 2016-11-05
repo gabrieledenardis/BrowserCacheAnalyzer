@@ -112,8 +112,8 @@ class FirefoxAnalyzer(QtCore.QObject):
                             len(self.list_cache_entries),
                             tot_elem,
                             cache_entry_instance.url_hash,
-                            "None",
-                            "None",
+                            "-",
+                            "-",
                             cache_entry_instance.expire_date
                         )
 

@@ -49,8 +49,7 @@ class CacheResource(object):
 
             # Resource is HTTP Header
             if self.is_http_header is True:
-                # self.resource_data = http_header_values(raw_header=self.resource_data)
-               print self.resource_data
+                self.resource_data = http_header_values(raw_header=self.resource_data)
 
             # Resource is not HTTP header
             else:

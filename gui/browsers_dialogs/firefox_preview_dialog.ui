@@ -32,6 +32,198 @@
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
+   <item row="1" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="0">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="font">
+        <font>
+         <family>Open Sans</family>
+         <pointsize>9</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Frequency:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="line_frequency">
+       <property name="font">
+        <font>
+         <family>Open Sans</family>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="line_expiration_date">
+       <property name="font">
+        <font>
+         <family>Open Sans</family>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="font">
+        <font>
+         <family>Open Sans</family>
+         <pointsize>9</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>App Id:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="font">
+        <font>
+         <family>Open Sans</family>
+         <pointsize>9</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Expiration date:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QLineEdit" name="line_file_size">
+       <property name="font">
+        <font>
+         <family>Open Sans</family>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLineEdit" name="line_flags">
+       <property name="font">
+        <font>
+         <family>Open Sans</family>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="line_app_id">
+       <property name="font">
+        <font>
+         <family>Open Sans</family>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="font">
+        <font>
+         <family>Open Sans</family>
+         <pointsize>9</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Flags:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="font">
+        <font>
+         <family>Open Sans</family>
+         <pointsize>9</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>File size (bytes):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="line_url_hash">
+       <property name="font">
+        <font>
+         <family>Open Sans</family>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="font">
+        <font>
+         <family>Open Sans</family>
+         <pointsize>9</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Url hash:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_8">
+       <property name="font">
+        <font>
+         <family>Open Sans</family>
+         <pointsize>9</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Resource URI:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QLineEdit" name="line_resource_uri">
+       <property name="font">
+        <font>
+         <family>Open Sans</family>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
@@ -124,173 +316,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-    </layout>
-   </item>
-   <item row="1" column="0">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="2" column="0">
-    <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="font">
-        <font>
-         <family>Open Sans</family>
-         <pointsize>9</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Url hash:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="line_url_hash">
-       <property name="font">
-        <font>
-         <family>Open Sans</family>
-         <pointsize>9</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="font">
-        <font>
-         <family>Open Sans</family>
-         <pointsize>9</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Frequency:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="line_frequency">
-       <property name="font">
-        <font>
-         <family>Open Sans</family>
-         <pointsize>9</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="font">
-        <font>
-         <family>Open Sans</family>
-         <pointsize>9</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Expiration date:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="line_expiration_date">
-       <property name="font">
-        <font>
-         <family>Open Sans</family>
-         <pointsize>9</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="font">
-        <font>
-         <family>Open Sans</family>
-         <pointsize>9</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>App Id:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="line_app_id">
-       <property name="font">
-        <font>
-         <family>Open Sans</family>
-         <pointsize>9</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_6">
-       <property name="font">
-        <font>
-         <family>Open Sans</family>
-         <pointsize>9</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Flags:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QLineEdit" name="line_flags">
-       <property name="font">
-        <font>
-         <family>Open Sans</family>
-         <pointsize>9</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="label_7">
-       <property name="font">
-        <font>
-         <family>Open Sans</family>
-         <pointsize>9</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>File size (bytes):</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QLineEdit" name="line_file_size">
-       <property name="font">
-        <font>
-         <family>Open Sans</family>
-         <pointsize>9</pointsize>
-        </font>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>
