@@ -25,14 +25,14 @@ except AttributeError:
 class Ui_FirefoxPreviewDialog(object):
     def setupUi(self, FirefoxPreviewDialog):
         FirefoxPreviewDialog.setObjectName(_fromUtf8("FirefoxPreviewDialog"))
-        FirefoxPreviewDialog.resize(758, 300)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+        FirefoxPreviewDialog.resize(650, 300)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(FirefoxPreviewDialog.sizePolicy().hasHeightForWidth())
         FirefoxPreviewDialog.setSizePolicy(sizePolicy)
-        FirefoxPreviewDialog.setMinimumSize(QtCore.QSize(0, 300))
-        FirefoxPreviewDialog.setMaximumSize(QtCore.QSize(16777215, 300))
+        FirefoxPreviewDialog.setMinimumSize(QtCore.QSize(650, 300))
+        FirefoxPreviewDialog.setMaximumSize(QtCore.QSize(650, 300))
         self.gridLayout_3 = QtGui.QGridLayout(FirefoxPreviewDialog)
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
         self.gridLayout = QtGui.QGridLayout()

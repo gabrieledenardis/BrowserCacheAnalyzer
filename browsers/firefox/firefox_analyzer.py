@@ -77,10 +77,17 @@ class FirefoxAnalyzer(QtCore.QObject):
 
                     # Record values
                     url_hash = ""
-                    for i in range(0, 20, 4):
+                    for i in range(20):
                         start = i
-                        stop = i + 4
-                        url_hash += format(struct.unpack(">I", record[start:stop])[0], "X")
+                        stop = i + 1
+                        url_hash += format(struct.unpack(">B", record[start:stop])[0], "X").zfill(2)
+
+                    # # Record values
+                    # url_hash = ""
+                    # for i in range(0, 20, 4):
+                    #     start = i
+                    #     stop = i + 4
+                    #     url_hash += format(struct.unpack(">I", record[start:stop])[0], "X")
 
                     frequency = struct.unpack(">I", record[20:24])[0]
                     expire_date_unix = struct.unpack(">I", record[24:28])[0]
@@ -130,6 +137,18 @@ class FirefoxAnalyzer(QtCore.QObject):
 
                     # Updating "list_cache_entries"
                     self.list_cache_entries.append(cache_entry_instance)
+
+        # Entries in "index" and in "entries" folder
+        list_entry_in = []
+        for idx, entry in enumerate(self.list_cache_entries):
+            if entry.url_hash in os.listdir(entries_path):
+                list_entry_in.append(entry.url_hash)
+
+        # Entries in "entries" folder but not in "index"
+        count = 0
+        for item in os.listdir(entries_path):
+            if item not in list_entry_in:
+                count += 1
 
         # Analysis terminated
         self.worker_is_running = False

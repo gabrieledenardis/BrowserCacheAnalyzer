@@ -768,7 +768,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             action_advanced_results = menu.addAction("Show advanced results")
             action = menu.exec_(self.table_analysis_preview.mapToGlobal(position))
 
-            # Copy element item
+            # "Copy item" element
             if action == action_copy_to_clipboard:
                 selection = self.table_analysis_preview.currentItem().text()
                 self.clipboard.clear()
@@ -779,27 +779,49 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                     QtGui.QMessageBox.Ok
                 )
 
-            # Advanced results item
+            # "Advanced results" item
             elif action == action_advanced_results:
-                # Retrieving selected item from "table_analysis_preview"
-                # Position in results list = table row
+
+                # Hash (column 0) from "table_analysis_preview"
                 current_table_row = self.table_analysis_preview.currentRow()
-                current_result_item = self.list_found_cache_entries[current_table_row]
+                current_hash = str(self.table_analysis_preview.item(current_table_row, 0).text())
+                current_selected_entry = None
 
                 # Entry preview
                 if self.matching_browser_key == "chrome":
+                    # Searching entry with "current hash" in "list_found_cache_entries" (for table sorting matching)
+                    for idx, entry in enumerate(self.list_found_cache_entries):
+                        if str(entry.key_hash) == current_hash:
+                            # Entry found in "idx" position in "list_found_cache_entries"
+                            current_selected_entry = self.list_found_cache_entries[idx]
+                            break
+
                     browser_preview_dialog = browsers_dialogs.chrome_preview_dialog.ChromePreviewDialog(
-                        entry=current_result_item
+                        entry=current_selected_entry
                     )
 
                 elif self.matching_browser_key == "firefox":
+                    # Searching entry with "current hash" in "list_found_cache_entries" (for table sorting matching).
+                    for idx, entry in enumerate(self.list_found_cache_entries):
+                        if str(entry.url_hash) == current_hash:
+                            # Entry found in "idx" position in "list_found_cache_entries"
+                            current_selected_entry = self.list_found_cache_entries[idx]
+                            break
+
                     browser_preview_dialog = browsers_dialogs.firefox_preview_dialog.FirefoxPreviewDialog(
-                        entry=current_result_item
+                        entry=current_selected_entry
                     )
 
                 elif self.matching_browser_key == "opera":
+                    # Searching entry with "current hash" in "list_found_cache_entries" (for table sorting matching).
+                    for idx, entry in enumerate(self.list_found_cache_entries):
+                        if str(entry.key_hash) == current_hash:
+                            # Entry found in "idx" position in "list_found_cache_entries"
+                            current_selected_entry = self.list_found_cache_entries[idx]
+                            break
+
                     browser_preview_dialog = browsers_dialogs.opera_preview_dialog.OperaPreviewDialog(
-                        entry=current_result_item
+                        entry=current_selected_entry
                     )
 
                 browser_preview_dialog.exec_()
