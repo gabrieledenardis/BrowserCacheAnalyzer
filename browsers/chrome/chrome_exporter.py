@@ -48,6 +48,7 @@ class ChromeExporter(QtCore.QObject):
             self.browser_version = browser_info[1]
             self.browser_inst_path = browser_info[2]
             self.browser_def_path = browser_def_path
+
         else:
             self.browser = browser_info[0].text()
             self.browser_version = browser_info[1].text()

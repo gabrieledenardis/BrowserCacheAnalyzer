@@ -48,6 +48,7 @@ class FirefoxExporter(QtCore.QObject):
             self.browser_version = browser_info[1]
             self.browser_inst_path = browser_info[2]
             self.browser_def_path = browser_def_path
+
         else:
             self.browser = browser_info[0].text()
             self.browser_version = browser_info[1].text()
@@ -74,16 +75,10 @@ class FirefoxExporter(QtCore.QObject):
         export_results_path = os.path.join(self.export_path, self.export_folder_name, results_folder_name)
 
         # Creating "export_report_path"
-        try:
-            os.makedirs(export_report_path)
-        except:
-            pass
+        os.makedirs(export_report_path)
 
         # Creating "export_results_path"
-        try:
-            os.makedirs(export_results_path)
-        except:
-            pass
+        os.makedirs(export_results_path)
 
         # HTML index in scan report folder
         export_report_index = os.path.join(export_report_path, "index_report.html")

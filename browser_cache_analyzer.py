@@ -879,6 +879,24 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
         # If path for export
         if self.current_export_path:
+
+            # Creating export main folder
+            try:
+                current_datetime = datetime.datetime.now().strftime("%d-%b-%Y-%H_%M_%S")
+                export_folder_name = "BrowserCacheAnalyzer-Export[{date}]".format(date=current_datetime)
+                self.export_folder_path = os.path.join(self.current_export_path, export_folder_name)
+                os.makedirs(self.export_folder_path)
+
+            # Unable to create folder for export
+            except Exception as _:
+                QtGui.QMessageBox.critical(
+                    QtGui.QMessageBox(), "Export folder error",
+                    "Unable to create \n{folder}".format(folder=self.export_folder_path),
+                    QtGui.QMessageBox.Ok
+                )
+
+                return
+
             # Export screen settings
             self.stackedWidget.setCurrentIndex(5)
             self.button_home.setEnabled(False)
@@ -887,23 +905,8 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             self.button_stop_export.setEnabled(False)
             self.progressBar_export.reset()
 
-            current_datetime = datetime.datetime.now().strftime("%d-%b-%Y-%H_%M_%S")
-            export_folder_name = "BrowserCacheAnalyzer-Export[{date}]".format(date=current_datetime)
-            self.export_folder_path = os.path.join(self.current_export_path, export_folder_name)
-
             self.line_input_path_export.setText(self.current_input_path.replace("/", "\\"))
             self.line_output_path_export.setText(self.export_folder_path)
-
-            # Creating export main folder
-            try:
-                os.makedirs(self.export_folder_path)
-
-            except OSError:
-                QtGui.QMessageBox.warning(
-                    QtGui.QMessageBox(), "Export folder",
-                    "Unable to create \n{folder}".format(folder=self.export_folder_path),
-                    QtGui.QMessageBox.Ok
-                )
 
             # Generating random MD5 and SHA1 for the export
             export_md5 = utils.create_random_hash()['random_md5']
@@ -1100,6 +1103,16 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 ##############################
 # SECTION: CLOSE APPLICATION #
 ##############################
+
+    def closeEvent(self, q_event):
+        """ Override for QDialog.closeEvent in QMainWindow.
+        Custom closing with alt-f4.
+        :param q_event: QEvent
+        :return: nothing
+        """
+
+        # Closing application
+        self.close_application()
 
     def close_application(self):
         """Slot for "button_close_application".
