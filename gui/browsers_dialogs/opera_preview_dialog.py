@@ -2,13 +2,17 @@
 # !/usr/bin/env python
 
 # PyQt4 imports
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtCore
+from PyQt4 import QtGui
 
 # Project imports
 import opd_converted_gui
 
 
 class OperaPreviewDialog(QtGui.QDialog, opd_converted_gui.Ui_OperaPreviewDialog):
+    """QDialog for Opera advanced info.
+    Showing info for selected entry in "table_analysis_preview".
+    """
 
     def __init__(self, parent=None, entry=None):
         super(OperaPreviewDialog, self).__init__(parent)
@@ -17,16 +21,15 @@ class OperaPreviewDialog(QtGui.QDialog, opd_converted_gui.Ui_OperaPreviewDialog)
         self.setupUi(self)
 
 
-##########################################
-# SECTION: APPLICATION ELEMENTS SETTINGS #
-##########################################
+############################################
+# SECTION: DIALOG WINDOW ELEMENTS SETTINGS #
+############################################
 
         # QDialog and buttons
-        self.setStyleSheet("background-color: rgb(225,225,225) ")
-        self.label_dialog_title.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+        self.setStyleSheet("background-color: rgb(215,215,215) ")
         for button in self.findChildren(QtGui.QPushButton):
             button.setStyleSheet("QPushButton {background-color: transparent; border: 1px solid darkgray}"
-                                 "QPushButton:hover {background-color: rgb(192,192,192)}")
+                                 "QPushButton:hover {background-color: rgb(185,185,185)}")
 
         # Lines edit
         for line in self.findChildren(QtGui.QLineEdit):
@@ -40,7 +43,8 @@ class OperaPreviewDialog(QtGui.QDialog, opd_converted_gui.Ui_OperaPreviewDialog)
 #######################
 
         # Values for selected item
-        self.label_dialog_title.setText(str(entry.key_hash))
+        self.line_dialog_title.setText(str(entry.key_hash))
+        self.line_dialog_title.home(False)
         self.line_key_hash.setText(str(entry.key_hash))
         self.line_next_entry_address.setText(str(entry.next_entry_address))
         self.line_reuse_count.setText(str(entry.reuse_count))
@@ -59,18 +63,16 @@ class OperaPreviewDialog(QtGui.QDialog, opd_converted_gui.Ui_OperaPreviewDialog)
         # Frameless window
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 
-        # Closing QDialog on "button close" click
+        # Closing QDialog on "button_close_dialog" click
         self.button_close_dialog.clicked.connect(self.close)
 
 
-######################################################################
-# SECTION: MOUSE METHODS OVERRIDE (Application window drag and drop) #
-######################################################################
+###################################
+# SECTION: MOUSE METHODS OVERRIDE #
+###################################
 
     def mousePressEvent(self, event):
-
-        """
-        Override for QtGui.QWidget.mousePressEvent to calculate mouse position at click.
+        """Override for QtGui.QWidget.mousePressEvent to calculate mouse position at click.
         Event position is relative to the application window.
         :param event: QtGui.QMouseEvent
         :return:
@@ -80,8 +82,7 @@ class OperaPreviewDialog(QtGui.QDialog, opd_converted_gui.Ui_OperaPreviewDialog)
         self.mouse_press_position = event.pos()
 
     def mouseMoveEvent(self, event):
-        """
-        Override for QtGui.QWidget.mouseMoveEvent to drag the application window.
+        """Override for QtGui.QWidget.mouseMoveEvent to drag the application window.
         Event buttons indicates the button state when the event was generated.
         Event position is the global position of the mouse cursor at the time of the event.
         :param event: QtGui.QMouseEvent
@@ -98,7 +99,7 @@ class OperaPreviewDialog(QtGui.QDialog, opd_converted_gui.Ui_OperaPreviewDialog)
 #########################
 
     def eventFilter(self, q_object, q_event):
-        """
+        """ Override for QtCore.QObject.eventFilter in QObject.
         Filters events if this object has been installed as an event filter for the watched object.
         :param q_object: QObject
         :param q_event: QEvent
@@ -120,3 +121,18 @@ class OperaPreviewDialog(QtGui.QDialog, opd_converted_gui.Ui_OperaPreviewDialog)
 
         # Pass the event on to the parent class
         return QtGui.QMainWindow.eventFilter(self, q_object, q_event)
+
+
+#########################
+# SECTION: CLOSE DIALOG #
+#########################
+
+    def closeEvent(self, q_event):
+        """ Override for QDialog.closeEvent in QDialog.
+        Restoring mouse cursor on QDialog closing with alt-f4 when the context menu has been selected on an item.
+        :param q_event: QEvent
+        :return: nothing
+        """
+
+        # Restoring mouse cursor on QDialog closing
+        QtGui.QApplication.restoreOverrideCursor()

@@ -6,21 +6,20 @@ from PyQt4 import QtCore
 
 # Python imports
 from threading import Event
-import datetime
-import os
 import platform
+import datetime
 import shutil
+import os
 
 # Project imports
+from operating_systems import windows
 from utilities import utils
 import index_header_reader
 import data_header_reader
-from operating_systems import windows
 
 
 class ChromeExporter(QtCore.QObject):
-    """
-    Exporter for Google Chrome cache.
+    """Exporter for Google Chrome cache.
     """
 
     # Signals
@@ -35,7 +34,6 @@ class ChromeExporter(QtCore.QObject):
         # Signal from "button_stop_export"
         self.signal_stop = Event()
 
-        # Attributes
         self.input_path = input_path
         self.export_path = export_path
         self.export_folder_name = export_folder_name
@@ -57,6 +55,11 @@ class ChromeExporter(QtCore.QObject):
             self.browser_def_path = browser_def_path
 
     def exporter(self):
+        """Exporting all cache entries found in analysis.
+        Creating an output main folder for the scan and two sub folders. One with an export report
+        and another with export results.
+        :return: nothing
+        """
 
         # Current time
         current_datetime = datetime.datetime.now().strftime("%d-%b-%Y-%H_%M_%S")
@@ -82,7 +85,7 @@ class ChromeExporter(QtCore.QObject):
         except:
             pass
 
-        # HTML index in scan report folder
+        # HTML index in scan report folders
         export_report_index = os.path.join(export_report_path, "index_report.html")
         export_results_index = os.path.join(export_results_path, "index_results.html")
 
@@ -156,7 +159,7 @@ class ChromeExporter(QtCore.QObject):
             time_zone=time_info['time_zone'],
             os_name=platform.system(),
             release=platform.release(),
-            release_version= platform.version(),
+            release_version=platform.version(),
             hostname=platform.node(),
             browser=self.browser,
             browser_version=self.browser_version,
@@ -210,12 +213,12 @@ class ChromeExporter(QtCore.QObject):
         html_string_report_chrome_data = ""
         for data_file in os.listdir(self.input_path):
             if "data_" in data_file:
-                # Info for current data_ file
+                # Values for current data_# file
                 data_num = str(data_file).split("_")[1]
                 data_file_path = os.path.join(self.input_path, "data_{num}".format(num=data_num))
                 chrome_data_header = data_header_reader.read_data_header(data_to_open=data_file_path)
                 chrome_data_info = utils.get_file_info(file_path=data_file_path)
-                # Data_ file values
+
                 html_string_report_chrome_data += """
                 <h2> {data_file} </h2>
                 <p> <b> Signature:  </b> {signature} </p>
@@ -255,10 +258,10 @@ class ChromeExporter(QtCore.QObject):
         html_string_report_chrome_f_ = ""
         for sep_file in os.listdir(self.input_path):
             if "f_" in sep_file:
-                # Info for current f_ file
+                # Values for current f_ file
                 f_file_path = os.path.join(self.input_path, sep_file)
                 chrome_f_info = utils.get_file_info(file_path=f_file_path)
-                # F_ file values
+
                 html_string_report_chrome_f_ += """
                 <h2> {f_file}  </h2>
                 <p> <b> Dimension (bytes) (from OS): </b> {dimension} </p>
@@ -360,7 +363,7 @@ class ChromeExporter(QtCore.QObject):
         <tbody>
         """
 
-        # Export is running
+        # Starting export
         self.worker_is_running = True
 
         html_string_results_table_row = ""
@@ -382,6 +385,7 @@ class ChromeExporter(QtCore.QObject):
                 len(self.entries_to_export)
             )
 
+            # Name for current entry
             entry_name = "{number}{sep}{hash}".format(
                 number=format(idx, "02"),
                 sep="_",
@@ -408,17 +412,7 @@ class ChromeExporter(QtCore.QObject):
                     <td> {content_type} </td> <td> {key_data} </td> <td> {creation_time} </td>
                     </tr>
                     """.format(
-                        content_type=entry.data_stream_addresses[0].resource_data['Content-Type'],
-                        key_data=entry.key_data[:75],
-                        creation_time=entry.creation_time
-                    )
-
-                # "Content-Type" not in HTTP header
-                else:
-                    html_string_results_table_row += """
-                    <td> - </td> <td> {key_data} </td> <td> {creation_time} </td>
-                    </tr>
-                    """.format(
+                        content_type=entry.data_stream_addresses[0].resource_data.get('Content-Type', "-"),
                         key_data=entry.key_data[:75],
                         creation_time=entry.creation_time
                     )
@@ -433,7 +427,7 @@ class ChromeExporter(QtCore.QObject):
                     creation_time=entry.creation_time
                 )
 
-            # Creating a HTML file with entry info
+            # Creating HTML file with entry info
             file_entry = os.path.join(export_results_path, entry_name)
             with open(file_entry + ".html", "w") as f_entry:
                 # Opening HTML file for the entry
@@ -543,7 +537,7 @@ class ChromeExporter(QtCore.QObject):
                             f_resource.seek(resource_offset)
                             resource_data = f_resource.read(resource_size)
 
-                            # Creating a file to save the resource read
+                            # Creating file to save the resource read
                             with open(file_entry_data, "wb") as f_entry_data:
                                 f_entry_data.write(resource_data)
 
@@ -554,7 +548,7 @@ class ChromeExporter(QtCore.QObject):
                             <h3> Header </h3>
                             """
 
-                            # Header keys and values
+                            # Header keys (tags) and values
                             for key, key_value in item.resource_data.iteritems():
                                 html_string_file_http_header += """
                                 <p> <b> {key}: </b> {key_value} </p>
@@ -572,7 +566,7 @@ class ChromeExporter(QtCore.QObject):
                         if not item.is_http_header or item.is_http_header == "Unknown":
                             file_entry_data = "".join((file_entry, "-data{num}".format(num=str_add)))
 
-                            # Key data NOT in separate file
+                            # Key data not in separate file
                             if item.file_type != "000":
 
                                 header_dimension = 8192
@@ -601,7 +595,7 @@ class ChromeExporter(QtCore.QObject):
                                     offset=resource_offset
                                 )
 
-                                # Creating a file to save the resource read
+                                # Creating file to save the resource read
                                 with open(file_entry_data, "wb") as f_entry_data:
                                     f_entry_data.write(str(item.resource_data))
 
@@ -614,6 +608,7 @@ class ChromeExporter(QtCore.QObject):
                                 </body>
                                 </html>
                                 """
+
                 # Writing file for the entry
                 f_entry.write(html_string_file_entry_open +
                               html_string_file_entry_container +

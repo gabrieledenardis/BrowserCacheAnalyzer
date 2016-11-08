@@ -2,14 +2,14 @@
 # !/usr/bin/env python
 
 # Python imports
-import struct
 import binascii
+import struct
 import urllib
 
 # Project imports
 from utilities import utils
-import cache_address
 import cache_resource
+import cache_address
 
 
 class CacheEntry(object):
@@ -51,7 +51,7 @@ class CacheEntry(object):
                 webkit_creation_time = hex(struct.unpack("<Q", f_entry.read(8))[0])
                 self.creation_time = utils.webkit_to_unix_timestamp(
                     webkit_time=webkit_creation_time,
-                    source="opera_cache"
+                    source="opera"
                 )
                 self.key_data_size = struct.unpack("<I", f_entry.read(4))[0]
                 self.long_key_data_address = struct.unpack("<I", f_entry.read(4))[0]

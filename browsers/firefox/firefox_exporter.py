@@ -6,21 +6,20 @@ from PyQt4 import QtCore
 
 # Python imports
 from threading import Event
-import datetime
-import os
 import platform
+import datetime
 import shutil
+import os
 import binascii
 
 # Project imports
+from operating_systems import windows
 from utilities import utils
 import index_header_reader
-from operating_systems import windows
 
 
 class FirefoxExporter(QtCore.QObject):
-    """
-    Exporter forMozilla Firefox cache.
+    """Exporter for Firefox cache.
     """
 
     # Signals
@@ -35,7 +34,6 @@ class FirefoxExporter(QtCore.QObject):
         # Signal from "button_stop_export"
         self.signal_stop = Event()
 
-        # Attributes
         self.input_path = input_path
         self.export_path = export_path
         self.export_folder_name = export_folder_name
@@ -44,7 +42,6 @@ class FirefoxExporter(QtCore.QObject):
         self.export_sha1 = export_sha1
         self.stopped_by_user = False
         self.worker_is_running = True
-
 
         if browser_portable:
             self.browser = browser_info[0]
@@ -57,8 +54,12 @@ class FirefoxExporter(QtCore.QObject):
             self.browser_inst_path = browser_info[2].text()
             self.browser_def_path = browser_def_path
 
-
     def exporter(self):
+        """Exporting all cache entries found in analysis.
+        Creating an output main folder for the scan and two sub folders. One with an export report
+        and another with export results.
+        :return: nothing
+        """
 
         # Current time
         current_datetime = datetime.datetime.now().strftime("%d-%b-%Y-%H_%M_%S")
@@ -93,6 +94,7 @@ class FirefoxExporter(QtCore.QObject):
         firefox_index_header = index_header_reader.read_index_header(index_file=firefox_index_file)
         firefox_index_info = utils.get_file_info(file_path=firefox_index_file)
 
+        # Path to sub folder containing entries
         entries_path = os.path.join(self.input_path, "entries")
 
         # Firefox cache folder info
@@ -168,7 +170,7 @@ class FirefoxExporter(QtCore.QObject):
             time_zone=time_info['time_zone'],
             os_name=platform.system(),
             release=platform.release(),
-            release_version= platform.version(),
+            release_version=platform.version(),
             hostname=platform.node(),
             browser=self.browser,
             browser_version=self.browser_version,
@@ -186,7 +188,7 @@ class FirefoxExporter(QtCore.QObject):
             entry_folder_last_access=entry_folder_info['folder_last_access_time'],
         )
 
-        # Chrome "index" file values
+        # Firefox "index" file values
         html_string_report_firefox_index = """
         <h2> index </h2>
         <p> <b> Index : </b> {index_file} </p>
@@ -216,7 +218,6 @@ class FirefoxExporter(QtCore.QObject):
         # Cache file info
         html_string_report_firefox_entry_file = ""
         for entry in os.listdir(entries_path):
-
             # Info for current f_ file
             entry_file_path = os.path.join(entries_path, entry)
             firefox_entry_file_info = utils.get_file_info(file_path=entry_file_path)
@@ -338,6 +339,7 @@ class FirefoxExporter(QtCore.QObject):
                 len(self.entries_to_export)
             )
 
+            # Name for current entry
             entry_name = "{number}{sep}{hash}".format(
                 number=format(idx, "02"),
                 sep="_",
@@ -371,6 +373,7 @@ class FirefoxExporter(QtCore.QObject):
                 html_string_file_entry_values = ""
                 html_string_file_entry_container = ""
                 html_string_file_entry_header = ""
+
                 html_string_file_entry_open = """
                 <html>
                 <head> <title> {entry_name} </title> </head>
@@ -379,11 +382,7 @@ class FirefoxExporter(QtCore.QObject):
                     entry_name=entry_name
                 )
 
-                # entry.entry_file_path not found for function "utils.get_file_info".
-                # "entry.url_hash" in "os.listdir(entries_path)" avoids this problem
-
                 if entry.url_hash in os.listdir(entries_path):
-                    # shutil.copy(os.path.join(entries_path, entry.url_hash) , file_entry + "-data")
                     html_string_file_entry_container = """
                     <h2> Report for entry: {entry} </h2>
                     <hr>
@@ -408,7 +407,6 @@ class FirefoxExporter(QtCore.QObject):
                     )
 
                     # Entry values
-
                     html_string_file_entry_values = """
                     <h3> Entry values </h3>
                     <p> <b> Version:  </b> {version} </p>
@@ -435,26 +433,28 @@ class FirefoxExporter(QtCore.QObject):
                     <h3> Header </h3>
                     <p> {header} </p>
                     """.format(
-                        header=entry.cache_resource_instance.http_header
-                    )
-
-                    html_string_file_entry_header += """
-                    <hr>
-                    <h3> Raw header </h3>
-                    <p> {header} </p>
-                    """.format(
                         header=entry.cache_resource_instance.raw_http_header
                     )
-                    # Copying resource
-                    entry_to_copy = os.path.join(entries_path, entry.url_hash)
 
-                    shutil.copy(os.path.join(entries_path, entry.url_hash), file_entry + "-data")
+                    # Creating file to save the header of the resource read
+                    file_entry_header = os.path.join(export_results_path, entry_name + "-header")
+                    with open(file_entry_header, "wb") as f_entry_header:
+                        f_entry_header.write(str(entry.resource_http_header))
+
+                    # Creating file to save the data read from file in entries sub folder
+                    file_entry_data = os.path.join(export_results_path, entry_name + "-data")
+                    entries_file = os.path.join(entries_path, entry.url_hash)
+                    with open(entries_file, "rb") as f_source:
+                        source_data = f_source.read(entry.cache_resource_instance.correct_data_starting_position)
+                        with open(file_entry_data, "wb") as file_entry_data:
+                            file_entry_data.write(str(source_data))
 
                 #  Closing HTML file for the entry
                 html_string_file_entry_close = """
                                             </body>
                                             </html>
                                             """
+
                 # Writing file for the entry
                 f_entry.write(html_string_file_entry_open +
                               html_string_file_entry_container +
@@ -463,9 +463,6 @@ class FirefoxExporter(QtCore.QObject):
                               html_string_file_entry_close
                               )
 
-
-
-
         # Closing HTML "export_results"
         html_string_results_close = """
                     </tbody>
@@ -473,7 +470,6 @@ class FirefoxExporter(QtCore.QObject):
                     </body>
                     </html>
                     """
-
 
         # Creating "export_results_index"
         with open(export_results_index, "w") as f_scan_index:

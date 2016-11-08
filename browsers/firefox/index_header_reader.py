@@ -4,14 +4,11 @@
 # Python imports
 import struct
 
-# Project imports
-from utilities import utils
-
 
 def read_index_header(index_file=None):
-    """Reading "index" file in chrome cache.
+    """Reading "index" file in Firefox cache.
     :param index_file: path to file index
-    :return: values read in chrome "index" file header
+    :return: values read in Firefox "index" file header
     """
 
     with open(index_file, "rb") as f_index:

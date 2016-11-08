@@ -2,9 +2,9 @@
 # !/usr/bin/env python
 
 # Python imports
-import os
 import datetime
 import hashlib
+import os
 
 
 ######################
@@ -109,9 +109,10 @@ def get_file_info(file_path=None):
     return results
 
 
-def webkit_to_unix_timestamp(webkit_time=None, **options):
+def webkit_to_unix_timestamp(webkit_time=None, source=None):
     """Convert from webkit timestamp to unix time stamp.
     :param webkit_time: webkit time read from a chrome cache file or from Windows registry
+    :param source: browser or windows registry
     :return: time in format pattern
     """
 
@@ -119,14 +120,14 @@ def webkit_to_unix_timestamp(webkit_time=None, **options):
     webkit_time_sec = None
 
     # Time from chrome cache (microseconds)
-    if options.get("source") == "chrome_cache" or options.get("source") == "opera_cache":
+    if source == "chrome" or source == "opera":
         # Conversion from microseconds to seconds
         microsec_in_sec = float(1000000)
         webkit_time_microsec = float(int(webkit_time, 0))
         webkit_time_sec = webkit_time_microsec / microsec_in_sec
 
     # Time from windows registry (seconds)
-    elif options.get("source") == "windows_registry":
+    elif source == "windows_registry":
         webkit_time_sec = webkit_time
 
     # Webkit and unix starting date
@@ -147,7 +148,7 @@ def webkit_to_unix_timestamp(webkit_time=None, **options):
 
 def create_random_hash():
     """Creating MD5 and SHA1 hash from a random number.
-    Used to provide identifiers for cache export
+    Providing unique identifiers for every cache export session.
     :return: MD5 and SHA1
     """
 

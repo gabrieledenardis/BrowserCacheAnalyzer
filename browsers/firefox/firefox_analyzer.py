@@ -6,18 +6,17 @@ from PyQt4 import QtCore
 
 # Python imports
 from threading import Event
-import os
-import struct
 import datetime
+import struct
 import time
+import os
 
 # Project imports
 import cache_entry
 
 
 class FirefoxAnalyzer(QtCore.QObject):
-    """
-    Analyzer for Firefox cache.
+    """Analyzer for Firefox cache.
     """
 
     # Signals
@@ -39,10 +38,15 @@ class FirefoxAnalyzer(QtCore.QObject):
         self.list_cache_entries = []
 
     def analyze_cache(self):
+        """Analyzing a Firefox cache input path updating a list with all entries found.
+       Also sending signals to update "table_analysis_preview" with values for found entries.
+       :return: nothing
+       """
 
         index_file = os.path.join(self.input_path, "index")
         index_file_dimension = os.path.getsize(index_file)
 
+        # Path to sub folder containing entries
         entries_path = os.path.join(self.input_path, "entries")
 
         header_dimension = 12
@@ -50,25 +54,28 @@ class FirefoxAnalyzer(QtCore.QObject):
         tot_elem = (index_file_dimension-header_dimension)/record_dimension
 
         with open(index_file, "rb") as f_index:
-
+            # Skipping header
             f_index.seek(header_dimension)
 
             # Cache file records
             while True:
-
                 record = f_index.read(record_dimension)
                 if not record:
                     break
 
+                # "Button_stop_analysis" clicked
                 if self.signal_stop.is_set():
                     self.stopped_by_user = True
                     self.worker_is_running = False
                     break
 
+                # Current position inside the file
                 current_pos = f_index.tell()
 
+                # Read file if not reminder (Remaining file dimension could be less than record dimension)
                 if (index_file_dimension - current_pos) % record_dimension != 0:
 
+                    # Record values
                     url_hash = ""
                     for i in range(0, 20, 4):
                         start = i
@@ -76,10 +83,8 @@ class FirefoxAnalyzer(QtCore.QObject):
                         url_hash += format(struct.unpack(">I", record[start:stop])[0], "X")
 
                     frequency = struct.unpack(">I", record[20:24])[0]
-
                     expire_date_unix = struct.unpack(">I", record[24:28])[0]
                     expire_date = datetime.datetime.fromtimestamp(expire_date_unix).strftime("%A - %d %B %Y - %H:%M:%S")
-
                     app_id = struct.unpack(">I", record[28:32])[0]
                     flags = ord(struct.unpack(">c", record[32:33])[0])
                     file_size = struct.unpack(">I", "\0" + record[33:])[0]
@@ -94,19 +99,25 @@ class FirefoxAnalyzer(QtCore.QObject):
                         file_size=file_size
                     )
 
+                    # Avoiding not continuously updating effects on "table_analysis_preview"
                     time.sleep(0.01)
 
+                    # Values from resource
                     resource_uri = cache_entry_instance.resource_uri
-                    resource_http_header = cache_entry_instance.resource_http_header
+                    resource_content_type = cache_entry_instance.resource_content_type
+
+                    # URI in resource
                     if resource_uri:
                         self.signal_update_table_preview.emit(
                             len(self.list_cache_entries),
                             tot_elem,
                             cache_entry_instance.url_hash,
                             resource_uri,
-                            resource_http_header,
+                            resource_content_type,
                             cache_entry_instance.expire_date
                         )
+
+                    # URI not in resource
                     else:
                         self.signal_update_table_preview.emit(
                             len(self.list_cache_entries),
@@ -117,6 +128,7 @@ class FirefoxAnalyzer(QtCore.QObject):
                             cache_entry_instance.expire_date
                         )
 
+                    # Updating "list_cache_entries"
                     self.list_cache_entries.append(cache_entry_instance)
 
         # Analysis terminated

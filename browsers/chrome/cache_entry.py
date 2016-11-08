@@ -2,21 +2,21 @@
 # !/usr/bin/env python
 
 # Python imports
-import struct
 import binascii
+import struct
 import urllib
 
 # Project imports
 from utilities import utils
-import cache_address
 import cache_resource
+import cache_address
 
 
 class CacheEntry(object):
 
     def __init__(self, cache_path=None, entry_file=None, block_dimension=None, block_number=None):
         """Complete entity stored in cache.
-        :param cache_path: path for chrome cache
+        :param cache_path: path for Chrome cache
         :param entry_file: file containing the entry
         :param block_dimension: dimension of the block in data_# file (depending on data_# file)
         :param block_number: number of the block in data_# file
@@ -51,7 +51,7 @@ class CacheEntry(object):
                 webkit_creation_time = hex(struct.unpack("<Q", f_entry.read(8))[0])
                 self.creation_time = utils.webkit_to_unix_timestamp(
                     webkit_time=webkit_creation_time,
-                    source="chrome_cache"
+                    source="chrome"
                 )
                 self.key_data_size = struct.unpack("<I", f_entry.read(4))[0]
                 self.long_key_data_address = struct.unpack("<I", f_entry.read(4))[0]

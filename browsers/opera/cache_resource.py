@@ -12,7 +12,6 @@ class CacheResource(object):
 
     def __init__(self, resource_file=None, file_type=None, block_dimension=None, block_number=None,
                  resource_size=None, is_http_header=None):
-
         """Resource for Opera cache.
         Contains the data pointed by the entry.
         :param resource_file: file containing the resource
@@ -60,9 +59,10 @@ class CacheResource(object):
 def http_header_values(raw_header=None):
     """Reading a raw header from resource and separating tag and value.
     :param raw_header: raw header from resource data
-    :return: HTTP header tag and values
+    :return: HTTP header tags and values
     """
 
+    # Dictionary containing keys (tags) and value for the header
     headers_dict = {}
 
     # All string except before HTTP and after =00=00

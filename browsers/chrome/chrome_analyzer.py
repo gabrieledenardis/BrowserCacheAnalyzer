@@ -6,8 +6,8 @@ from PyQt4 import QtCore
 
 # Python imports
 from threading import Event
-import os
 import struct
+import os
 
 # Project imports
 import index_header_reader
@@ -16,8 +16,7 @@ import cache_entry
 
 
 class ChromeAnalyzer(QtCore.QObject):
-    """
-    Analyzer for Google Chrome cache.
+    """Analyzer for Chrome cache.
     """
 
     # Signals
@@ -39,6 +38,10 @@ class ChromeAnalyzer(QtCore.QObject):
         self.list_cache_entries = []
 
     def analyze_cache(self):
+        """Analyzing a Chrome cache input path updating a list with all entries found.
+        Also sending signals to update "table_analysis_preview" with values for found entries.
+        :return: nothing
+        """
 
         # Chrome "index" file
         index_file = os.path.join(self.input_path, "index")

@@ -6,6 +6,7 @@ try:
     import _winreg
 except ImportError:
     _winreg = None
+
 import struct
 
 # Project imports
@@ -13,8 +14,8 @@ from utilities import utils
 
 
 def get_registry_time_info():
-    """Reading in Windows Registry for info about system time.
-    :return: last known good time, special polling interval, ntp server, synchronization type, time zone
+    """Reading in Windows Registry for info about system time last synchronization, ntp server and timezone.
+    :return: last known good time, special polling interval, ntp server, synchronization type, timezone
     """
 
     # Time registry keys
@@ -40,13 +41,17 @@ def get_registry_time_info():
             try:
                 # Searching for "LastKnownGoodTime"
                 value_name, value_data, value_data_type = _winreg.EnumValue(w32time_config, val)
+
                 if value_name == "LastKnownGoodTime":
                     # Value expressed in units of 100 nanoseconds from 01 Jan 1601
                     last_known_time = struct.unpack('<Q', value_data)[0]
+
             except WindowsError as _:
                 pass
+
     except WindowsError as _:
         pass
+
     finally:
         # Closing w32time_config key
         _winreg.CloseKey(w32time_config)
@@ -61,14 +66,19 @@ def get_registry_time_info():
             try:
                 # Searching for "NtpServer" and "Type"
                 value_name, value_data, value_data_type = _winreg.EnumValue(w32time_parameters, val)
+
                 if value_name == "NtpServer":
                     ntp_server = value_data
+
                 elif value_name == "Type":
                     sync_type = value_data
+
             except WindowsError as _:
                 pass
+
     except WindowsError as _:
         pass
+
     finally:
         # Closing w32time_parameters key
         _winreg.CloseKey(w32time_parameters)
@@ -88,13 +98,17 @@ def get_registry_time_info():
             try:
                 # Searching for "SpecialPollInterval"
                 value_name, value_data, value_data_type = _winreg.EnumValue(w32time_time_providers, val)
+
                 if value_name == "SpecialPollInterval":
                     # Value expressed in seconds
                     special_poll_interval = value_data
+
             except WindowsError as _:
                 pass
+
     except WindowsError as _:
         pass
+
     finally:
         # Closing w32time_time_providers key
         _winreg.CloseKey(w32time_time_providers)
@@ -114,12 +128,16 @@ def get_registry_time_info():
             try:
                 # Searching for "TimeZoneKeyName"
                 value_name, value_data, value_data_type = _winreg.EnumValue(time_zone_information, val)
+
                 if value_name == "TimeZoneKeyName":
                     time_zone = value_data
+
             except WindowsError as _:
                 pass
+
     except WindowsError as _:
         pass
+
     finally:
         # Closing time_zone_information key
         _winreg.CloseKey(time_zone_information)

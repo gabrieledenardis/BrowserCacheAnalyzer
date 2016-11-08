@@ -526,7 +526,7 @@
     <item row="3" column="0" colspan="2">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>5</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="page">
        <layout class="QGridLayout" name="gridLayout_10">
@@ -586,16 +586,16 @@
            </spacer>
           </item>
           <item row="0" column="1">
-           <widget class="QPushButton" name="button_portable_versions">
+           <widget class="QPushButton" name="button_portable_browsers">
             <property name="minimumSize">
              <size>
-              <width>120</width>
+              <width>160</width>
               <height>30</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>120</width>
+              <width>160</width>
               <height>30</height>
              </size>
             </property>
@@ -608,7 +608,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Portable versions</string>
+             <string>Portable browsers</string>
             </property>
            </widget>
           </item>
@@ -869,7 +869,7 @@
            </spacer>
           </item>
           <item row="0" column="1">
-           <widget class="QPushButton" name="button_back_portable_versions">
+           <widget class="QPushButton" name="button_back_portable_browsers">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -922,10 +922,36 @@
            </font>
           </property>
           <property name="title">
-           <string>Portable available browsers</string>
+           <string>Available portable browsers</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_31">
-           <item row="0" column="0" colspan="3">
+           <item row="3" column="0">
+            <spacer name="horizontalSpacer_14">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>254</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="2" column="1">
+            <spacer name="verticalSpacer_18">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="1" column="0" colspan="3">
             <layout class="QGridLayout" name="gridLayout_30">
              <item row="0" column="2">
               <spacer name="horizontalSpacer_18">
@@ -944,13 +970,13 @@
               <widget class="QLabel" name="label_13">
                <property name="font">
                 <font>
-                 <pointsize>9</pointsize>
+                 <pointsize>10</pointsize>
                  <weight>75</weight>
                  <bold>true</bold>
                 </font>
                </property>
                <property name="text">
-                <string>Selected portable browser:</string>
+                <string>Selected browser:</string>
                </property>
               </widget>
              </item>
@@ -958,7 +984,7 @@
               <widget class="QLabel" name="label_selected_portable">
                <property name="font">
                 <font>
-                 <pointsize>9</pointsize>
+                 <pointsize>10</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -968,33 +994,7 @@
              </item>
             </layout>
            </item>
-           <item row="1" column="1">
-            <spacer name="verticalSpacer_18">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="2" column="0">
-            <spacer name="horizontalSpacer_14">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>254</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="2" column="1">
+           <item row="3" column="1">
             <layout class="QGridLayout" name="gridLayout_29">
              <item row="0" column="2">
               <widget class="QPushButton" name="button_portable_firefox">
@@ -1135,7 +1135,7 @@
              </item>
             </layout>
            </item>
-           <item row="2" column="2">
+           <item row="3" column="2">
             <spacer name="horizontalSpacer_15">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -1148,7 +1148,7 @@
              </property>
             </spacer>
            </item>
-           <item row="3" column="1">
+           <item row="4" column="1">
             <spacer name="verticalSpacer_17">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
@@ -1157,6 +1157,19 @@
               <size>
                <width>20</width>
                <height>51</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="0" colspan="3">
+            <spacer name="verticalSpacer_16">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
               </size>
              </property>
             </spacer>
@@ -1651,7 +1664,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>. . . </string>
+                <string>.  .  . </string>
                </property>
               </widget>
              </item>
@@ -2577,7 +2590,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>Exporting:</string>
+                <string>Exporting in:</string>
                </property>
               </widget>
              </item>

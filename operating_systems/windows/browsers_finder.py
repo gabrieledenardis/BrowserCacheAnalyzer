@@ -10,9 +10,6 @@ except ImportError:
 # Project imports
 from utilities import utils, browsers_utils
 
-# # Uninstall registry key (For user installed browsers)
-# UNINSTALL_KEY = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
-
 
 def finder():
     """ Looking in system registry for installed browsers.
@@ -54,31 +51,42 @@ def finder():
                                 0,
                                 _winreg.KEY_READ
                             )
+
                             # Searching in matching browser key values
                             for val in range(_winreg.QueryInfoKey(browser_key)[1]):
                                 try:
                                     # Browser key values
                                     value_name, value_data, value_data_type = _winreg.EnumValue(browser_key, val)
+
                                     # Name, version and installation path values
                                     if value_name == "DisplayName":
                                         browser_name = value_data
+
                                     elif value_name == "DisplayVersion":
                                         browser_version = value_data
+
                                     elif value_name == "InstallLocation":
                                         browser_path = value_data
+
                                 except WindowsError as _:
                                     pass
+
                             # Updating "list_found_browsers"
                             list_found_browsers.append([browser, browser_name, browser_version, browser_path])
+
                         except WindowsError as _:
                             pass
+
                         finally:
                             # Closing matching browser key
                             _winreg.CloseKey(browser_key)
+
             except WindowsError as _:
                 pass
+
     except WindowsError as _:
         pass
+
     finally:
         # Closing uninstall key
         _winreg.CloseKey(uninstall_key)

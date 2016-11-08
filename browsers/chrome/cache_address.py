@@ -8,15 +8,15 @@ import os
 class CacheAddress(object):
 
     def __init__(self, binary_address=None, cache_path=None):
-        """Location in chrome cache.
+        """Location in Chrome cache.
         The 32 bits address indicates the actual location (file and position inside the file).
         :param binary_address: 32 bits address
-        :param cache_path: path for chrome cache
+        :param cache_path: path for Chrome cache
         """
 
         # 32 bits address
         self.bin_address = binary_address
-        # Folder path for chrome cache
+        # Folder path for Chrome cache
         self.cache_path = cache_path
         # Cache file type (Bits 1-3 in binary address)
         self.file_type = self.bin_address[1:4]

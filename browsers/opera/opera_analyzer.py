@@ -6,8 +6,8 @@ from PyQt4 import QtCore
 
 # Python imports
 from threading import Event
-import os
 import struct
+import os
 
 # Project imports
 import index_header_reader
@@ -16,8 +16,7 @@ import cache_entry
 
 
 class OperaAnalyzer(QtCore.QObject):
-    """
-    Analyzer for Opera cache.
+    """Analyzer for Opera cache.
     """
 
     # Signals
@@ -39,6 +38,10 @@ class OperaAnalyzer(QtCore.QObject):
         self.list_cache_entries = []
 
     def analyze_cache(self):
+        """Analyzing an Opera cache input path updating a list with all entries found.
+        Also sending signals to update "table_analysis_preview" with values for found entries.
+        :return: nothing
+        """
 
         # Opera "index" file
         index_file = os.path.join(self.input_path, "index")
@@ -56,7 +59,6 @@ class OperaAnalyzer(QtCore.QObject):
 
             # Addresses table in "index" file
             for addresses in range(table_size):
-
                 # "Button_stop_analysis" clicked
                 if self.signal_stop.is_set():
                     self.stopped_by_user = True

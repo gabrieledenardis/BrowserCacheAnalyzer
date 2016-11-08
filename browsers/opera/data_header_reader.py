@@ -8,7 +8,7 @@ import struct
 def read_data_header(data_to_open=None):
     """Reading "data_#" files in Opera cache.
     :param data_to_open: path to file index
-    :return: values read in data_# file header
+    :return: values read in Opera "data_#" file header
     """
 
     with open(data_to_open, "rb") as f_data:

@@ -11,7 +11,7 @@ from utilities import utils
 def read_index_header(index_file=None):
     """Reading "index" file in Opera cache.
     :param index_file: path to file index
-    :return: values read in chrome "index" file header
+    :return: values read in Opera "index" file header
     """
 
     with open(index_file, "rb") as f_index:
@@ -33,7 +33,7 @@ def read_index_header(index_file=None):
         webkit_creation_time = hex(struct.unpack("<Q", f_index.read(8))[0])
         creation_time = utils.webkit_to_unix_timestamp(
             webkit_time=webkit_creation_time,
-            source="opera_cache"
+            source="opera"
         )
 
     results = {'signature': signature,
