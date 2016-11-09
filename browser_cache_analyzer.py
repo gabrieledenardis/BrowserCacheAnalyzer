@@ -567,7 +567,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
                     QtGui.QMessageBox.warning(
                         QtGui.QMessageBox(), "Wrong input path",
-                        "{path} <br> is not correct for ''{browser}''".format(
+                        "{path} <br> is not correct for {browser}".format(
                             path=dialog_input_path.replace("/", "\\"),
                             browser=browser_name
                         ),
@@ -649,6 +649,8 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         # Already visited "analysis screen"
         self.progressBar_analysis.reset()
         self.table_analysis_preview.setRowCount(0)
+        self.context_menu_enabled = False
+        self.table_analysis_preview.setToolTip("")
 
         # Clipboard to store copied values from "table_analysis_preview"
         self.clipboard = QtGui.QApplication.clipboard()
@@ -781,7 +783,6 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
             # "Advanced results" item
             elif action == action_advanced_results:
-
                 # Hash (column 0) from "table_analysis_preview"
                 current_table_row = self.table_analysis_preview.currentRow()
                 current_hash = str(self.table_analysis_preview.item(current_table_row, 0).text())
@@ -998,6 +999,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                 self.firefox_exporter_worker.signal_update_export.connect(self.update_export_progress)
                 self.firefox_exporter_thread.finished.connect(self.export_terminated)
                 self.firefox_exporter_worker.signal_enable_stop_button.connect(self.enable_stop_export_button)
+                self.firefox_exporter_worker.signal_disable_stop_button.connect(self.disable_stop_export_button)
                 self.current_exporter_thread = self.firefox_exporter_thread
                 self.current_exporter_worker = self.firefox_exporter_worker
                 self.current_exporter_thread.start()
@@ -1043,7 +1045,17 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         Enabling "button_stop_export" if export started.
         :return: nothing
         """
+
         self.button_stop_export.setEnabled(True)
+
+    def disable_stop_export_button(self):
+        """Slot for "signal_disable_stop_button" in "current_exporter_worker" (firefox_exporter_worker).
+        Disabling "button_stop_export" in Firefox export during transition between "entries in index" and
+        "entries not in index".
+        :return: nothing
+        """
+
+        self.button_stop_export.setEnabled(False)
 
     def update_export_progress(self, exported_entries=None, tot_entries=None):
         """Slot for "signal_update_export" in "current_exporter_worker".
@@ -1090,7 +1102,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             shutil.rmtree(self.export_folder_path, ignore_errors=True)
             QtGui.QMessageBox.information(
                 QtGui.QMessageBox(), "Deleted folder",
-                "{folder} deleted after stop export".format(folder=self.export_folder_path),
+                "{folder} deleted after stop by user".format(folder=self.export_folder_path),
                 QtGui.QMessageBox.Ok
             )
 
@@ -1188,7 +1200,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
         else:
             # Confirmation before quitting
             msg_confirm_exit = QtGui.QMessageBox.question(
-                QtGui.QMessageBox(), "Confirm", "Are you sure you want to quit?",
+                QtGui.QMessageBox(), "Confirm quit application", "Are you sure you want to quit?",
                 QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                 QtGui.QMessageBox.No)
 

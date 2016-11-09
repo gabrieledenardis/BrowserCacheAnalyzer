@@ -21,6 +21,7 @@ class CacheResource(object):
 
         self.entries_path = entries_path
         self.url_hash = url_hash
+        self.resource_file_path = os.path.join(self.entries_path, self.url_hash)
         self.correct_data_starting_position = None
         self.version = None
         self.fetch_count = None
@@ -60,7 +61,6 @@ class CacheResource(object):
                 # Values
                 self.version = struct.unpack(">I", f_hash.read(4))[0]
                 self.fetch_count = struct.unpack(">I", f_hash.read(4))[0]
-                # TODO: values for offset
 
                 last_fetched_date_unix = struct.unpack(">I", f_hash.read(4))[0]
                 if last_fetched_date_unix != 0:

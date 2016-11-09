@@ -5,3 +5,6 @@
 *.pyc
 gui/bca_converted_gui.py
 gui/icons_rc.py
+gui/browsers_dialogs/cpd_converted_gui
+gui/browsers_dialogs/fpd_converted_gui
+gui/browsers_dialogs/opd_converted_gui

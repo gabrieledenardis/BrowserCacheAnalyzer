@@ -31,29 +31,33 @@ class OperaExporter(QtCore.QObject):
                  browser_portable=None, browser_info=None, browser_def_path=None, export_md5=None, export_sha1=None):
         super(OperaExporter, self).__init__(parent)
 
-        # Signal from "button_stop_export"
-        self.signal_stop = Event()
-
         self.input_path = input_path
         self.export_path = export_path
         self.export_folder_name = export_folder_name
         self.entries_to_export = entries_to_export
         self.export_md5 = export_md5
         self.export_sha1 = export_sha1
-        self.stopped_by_user = False
-        self.worker_is_running = False
 
+        # Portable browser
         if browser_portable:
             self.browser = browser_info[0]
             self.browser_version = browser_info[1]
             self.browser_inst_path = browser_info[2]
             self.browser_def_path = browser_def_path
 
+        # Installed browser
         else:
             self.browser = browser_info[0].text()
             self.browser_version = browser_info[1].text()
             self.browser_inst_path = browser_info[2].text()
             self.browser_def_path = browser_def_path
+
+        # Signal from "button_stop_export"
+        self.signal_stop = Event()
+
+        # Exporter state
+        self.stopped_by_user = False
+        self.worker_is_running = True
 
     def exporter(self):
         """Exporting all cache entries found in analysis.
@@ -66,29 +70,18 @@ class OperaExporter(QtCore.QObject):
         current_datetime = datetime.datetime.now().strftime("%d-%b-%Y-%H_%M_%S")
         current_datetime_extended = datetime.datetime.now().strftime("%A - %d %B %Y - %H:%M:%S")
 
-        # Export folders
-        report_folder_name = "Export_report"
+        # Results folder name
         results_folder_name = "Export_results"
 
-        # Paths for export folder
-        export_report_path = os.path.join(self.export_path, self.export_folder_name, report_folder_name)
+        # Path for export results folder
         export_results_path = os.path.join(self.export_path, self.export_folder_name, results_folder_name)
 
-        # Creating "export_report_path"
-        try:
-            os.makedirs(export_report_path)
-        except:
-            pass
+        # Creating export folder
+        os.makedirs(export_results_path)
 
-        # Creating "export_results_path"
-        try:
-            os.makedirs(export_results_path)
-        except:
-            pass
-
-        # HTML index in scan report folders
-        export_report_index = os.path.join(export_report_path, "index_report.html")
-        export_results_index = os.path.join(export_results_path, "index_results.html")
+        # HTML indexes in export folder
+        export_report_index = os.path.join(self.export_path, self.export_folder_name, "index_report.html")
+        export_results_index = os.path.join(self.export_path, self.export_folder_name, "index_results.html")
 
         # Chrome "index" file info
         opera_index_file = os.path.join(self.input_path, "index")
@@ -96,59 +89,66 @@ class OperaExporter(QtCore.QObject):
         opera_index_info = utils.get_file_info(file_path=opera_index_file)
 
         # Chrome cache folder info
-        folder_info = utils.get_folder_info(folder_path=self.input_path)
+        cache_folder_info = utils.get_folder_info(folder_path=self.input_path)
+
+        # Number of entries found
+        num_entries_found = len(self.entries_to_export)
 
 
 ##########################
 # SECTION: EXPORT REPORT #
 ##########################
 
-        # Opening HTML "export_report"
-        html_string_export_report_open = """
+        # Opening "export_report"
+        html_string_report_open = """
         <html>
-        <head> <title> {scan_date} </title> </head>
+        <head> <title> {export_date} </title>
+        <link rel="stylesheet" type="text/css" href="file://{style_css}">
+        </head>
         <body>
         """.format(
-            scan_date=current_datetime
+            export_date=current_datetime,
+            style_css=utils.EXPORT_OUTPUT_CSS_PATH
         )
 
         # Report info
         time_info = windows.registry_system_time.get_registry_time_info()
         html_string_report_info = """
-        <h1> <b> Browser Cache Analyzer <br> Export report [{analysis_date}] </b> </h1>
-        <p> <b> Analysis folder: </b> {input_folder} </p>
-        <p> <b> Export folder: </b> {export_folder} </p>
-        <p> <b> Export md5: </b> {export_md5} </p>
-        <p> <b> Export sha1: </b> {export_sha1} </p>
+        <h1 class='main_title'> <b> Browser Cache Analyzer <br> Export report [{export_date}] </b> </h1>
+        <h2 class='sub_title'> Export info </h2>
+        <p class='analysis_item'> <b> Analysis folder: </b> {input_folder} </p>
+        <p class='analysis_item'> <b> Export folder: </b> {export_folder} </p>
+        <p class='analysis_item'> <b> Export md5: </b> {export_md5} </p>
+        <p class='analysis_item'> <b> Export sha1: </b> {export_sha1} </p>
         <hr>
-        <h2> System info </h2>
-        <p> <b> System / Os name: </b> {os_name} </p>
-        <p> <b> Release: </b> {release} </p>
-        <p> <b> Release version: </b> {release_version} </p>
-        <p> <b> Hostname: </b> {hostname} </p>
+        <h2 class='sub_title'> System info </h2>
+        <p class='analysis_item'> <b> System / Os name: </b> {os_name} </p>
+        <p class='analysis_item'> <b> Release: </b> {release} </p>
+        <p class='analysis_item'> <b> Release version: </b> {release_version} </p>
+        <p class='analysis_item'> <b> Hostname: </b> {hostname} </p>
         <hr>
-        <h2> System time info </h2>
-        <p> <b> Last known good time: </b> {last_known} </p>
-        <p> <b> Next synchronization time: </b> {next_sync} </p>
-        <p> <b> Ntp server: </b> {ntp_server} </p>
-        <p> <b> Synchronization type: </b> {sync_type} </p>
-        <p> <b> Time zone: </b> {time_zone} </p>
+        <h2 class='sub_title'> System time info </h2>
+        <p class='analysis_item'> <b> Last known good time: </b> {last_known} </p>
+        <p class='analysis_item'> <b> Next synchronization time: </b> {next_sync} </p>
+        <p class='analysis_item'> <b> Ntp server: </b> {ntp_server} </p>
+        <p class='analysis_item'> <b> Synchronization type: </b> {sync_type} </p>
+        <p class='analysis_item'> <b> Time zone: </b> {time_zone} </p>
         <hr>
-        <h2> Browser info </h2>
-        <p> <b> Browser: </b> {browser} </p>
-        <p> <b> Browser version: </b> {browser_version} </p>
-        <p> <b> Browser installation path: </b> {browser_inst_path} </p>
-        <p> <b> Browser default cache path: </b> {browser_def_path} </p>
+        <h2 class='sub_title'> Browser info </h2>
+        <p class='analysis_item'> <b> Browser: </b> {browser} </p>
+        <p class='analysis_item'> <b> Browser version: </b> {browser_version} </p>
+        <p class='analysis_item'> <b> Browser installation path: </b> {browser_inst_path} </p>
+        <p class='analysis_item'> <b> Browser default cache path: </b> {browser_def_path} </p>
         <hr>
-        <h2> Cache folder info </h2>
-        <p> <b> Cache folder dimension (bytes): </b> {dimension} </p>
-        <p> <b> Cache folder elements: </b> {elements} </p>
-        <p> <b> Cache folder creation time: </b> {creation_time} </p>
-        <p> <b> Cache folder last modified time: </b> {modified_time} </p>
-        <p> <b> Cache folder last access: </b> {last_access} </p>
+        <h2 class='sub_title'> Cache folder info </h2>
+        <p class='analysis_item'> <b> Cache folder dimension (bytes): </b> {cache_dimension} </p>
+        <p class='analysis_item'> <b> Cache folder elements: </b> {cache_elements} </p>
+        <p class='analysis_item'> <b> Cache folder creation time: </b> {cache_creation_time} </p>
+        <p class='analysis_item'> <b> Cache folder last modified time: </b> {cache_modified_time} </p>
+        <p class='analysis_item'> <b> Cache folder last access: </b> {cache_last_access} </p>
         <hr>
         """.format(
-            analysis_date=current_datetime_extended,
+            export_date=current_datetime_extended,
             input_folder=self.input_path,
             export_folder=os.path.join(self.export_path, self.export_folder_name),
             export_md5=self.export_md5,
@@ -166,31 +166,31 @@ class OperaExporter(QtCore.QObject):
             browser_version=self.browser_version,
             browser_inst_path=self.browser_inst_path,
             browser_def_path=self.browser_def_path,
-            dimension=folder_info['folder_dimension'],
-            elements=folder_info['folder_elements'],
-            creation_time=folder_info['folder_creation_time'],
-            modified_time=folder_info['folder_last_modified_time'],
-            last_access=folder_info['folder_last_access_time']
+            cache_dimension=cache_folder_info['folder_dimension'],
+            cache_elements=cache_folder_info['folder_elements'],
+            cache_creation_time=cache_folder_info['folder_creation_time'],
+            cache_modified_time=cache_folder_info['folder_last_modified_time'],
+            cache_last_access=cache_folder_info['folder_last_access_time'],
         )
 
         # Opera "index" file values
         html_string_report_opera_index = """
-        <h2> index </h2>
-        <p> <b> Index : </b> {index_file} </p>
-        <p> <b> Signature: </b> {signature} </p>
-        <p> <b> Minor version: </b> {minor_version} </p>
-        <p> <b> Major version: </b> {major_version} </p>
-        <p> <b> Number of entries: </b> {entries} </p>
-        <p> <b> Stored data size (bytes): </b> {stored_data} </p>
-        <p> <b> Last created f_ file: </b> f_{last_f_file} </p>
-        <p> <b> Address table size: </b> {table_size} </p>
-        <p> <b> Creation time: </b> {creation_time} </p>
-        <p> <b> Index md5: </b> {md5} </p>
-        <p> <b> Index sha1: </b> {sha1} </p>
-        <p> <b> Dimension (bytes) (from OS): </b> {dimension} </p>
-        <p> <b> Creation time (from OS): </b> {os_creation_time} </p>
-        <p> <b> Last modified time (from OS): </b> {os_last_modified_time} </p>
-        <p> <b> Last access time (from OS): </b> {os_last_access_time} </p>
+        <h2 class='sub_title'> index </h2>
+        <p class='analysis_item'> <b> Index : </b> {index_file} </p>
+        <p class='analysis_item'> <b> Signature: </b> {signature} </p>
+        <p class='analysis_item'> <b> Minor version: </b> {minor_version} </p>
+        <p class='analysis_item'> <b> Major version: </b> {major_version} </p>
+        <p class='analysis_item'> <b> Number of entries: </b> {entries} </p>
+        <p class='analysis_item'> <b> Stored data size (bytes): </b> {stored_data} </p>
+        <p class='analysis_item'> <b> Last created f_ file: </b> f_{last_f_file} </p>
+        <p class='analysis_item'> <b> Address table size: </b> {table_size} </p>
+        <p class='analysis_item'> <b> Creation time: </b> {creation_time} </p>
+        <p class='analysis_item'> <b> Index md5: </b> {md5} </p>
+        <p class='analysis_item'> <b> Index sha1: </b> {sha1} </p>
+        <p class='analysis_item'> <b> Dimension (bytes) (from OS): </b> {dimension} </p>
+        <p class='analysis_item'> <b> Creation time (from OS): </b> {os_creation_time} </p>
+        <p class='analysis_item'> <b> Last modified time (from OS): </b> {os_last_modified_time} </p>
+        <p class='analysis_item'> <b> Last access time (from OS): </b> {os_last_access_time} </p>
         <hr>
         """.format(
             index_file=opera_index_file,
@@ -221,21 +221,21 @@ class OperaExporter(QtCore.QObject):
                 opera_data_info = utils.get_file_info(file_path=data_file_path)
 
                 html_string_report_opera_data += """
-                <h2> {data_file} </h2>
-                <p> <b> Signature:  </b> {signature} </p>
-                <p> <b> Minor version:  </b> {minor_version} </p>
-                <p> <b> Major version:  </b> {major_version} </p>
-                <p> <b> File number:  </b> {file_number} </p>
-                <p> <b> Next file number:  </b> {next_file_number} </p>
-                <p> <b> Block size (bytes):  </b> {block_size} </p>
-                <p> <b> Number of entries:  </b> {num_entries} </p>
-                <p> <b> Max number of entries:  </b> {max_num_entries} </p>
-                <p> <b> {data_file} md5:  </b> {md5} </p>
-                <p> <b> {data_file} sha1:  </b> {sha1} </p>
-                <p> <b> Dimension (bytes) (from OS): </b> {dimension} </p>
-                <p> <b> Creation time (from OS): </b> {os_creation_time} </p>
-                <p> <b> Last modified time (from OS): </b> {os_last_modified_time} </p>
-                <p> <b> Last access time (from OS): </b> {os_last_access_time} </p>
+                <h2 class='sub_title'> {data_file} </h2>
+                <p class='analysis_item'> <b> Signature:  </b> {signature} </p>
+                <p class='analysis_item'> <b> Minor version:  </b> {minor_version} </p>
+                <p class='analysis_item'> <b> Major version:  </b> {major_version} </p>
+                <p class='analysis_item'> <b> File number:  </b> {file_number} </p>
+                <p class='analysis_item'> <b> Next file number:  </b> {next_file_number} </p>
+                <p class='analysis_item'> <b> Block size (bytes):  </b> {block_size} </p>
+                <p class='analysis_item'> <b> Number of entries:  </b> {num_entries} </p>
+                <p class='analysis_item'> <b> Max number of entries:  </b> {max_num_entries} </p>
+                <p class='analysis_item'> <b> {data_file} md5:  </b> {md5} </p>
+                <p class='analysis_item'> <b> {data_file} sha1:  </b> {sha1} </p>
+                <p class='analysis_item'> <b> Dimension (bytes) (from OS): </b> {dimension} </p>
+                <p class='analysis_item'> <b> Creation time (from OS): </b> {os_creation_time} </p>
+                <p class='analysis_item'> <b> Last modified time (from OS): </b> {os_last_modified_time} </p>
+                <p class='analysis_item'> <b> Last access time (from OS): </b> {os_last_access_time} </p>
                 <hr>
                 """.format(
                     data_file=data_file,
@@ -264,13 +264,13 @@ class OperaExporter(QtCore.QObject):
                 opera_f_info = utils.get_file_info(file_path=f_file_path)
 
                 html_string_report_opera_f_ += """
-                <h2> {f_file}  </h2>
-                <p> <b> Dimension (bytes) (from OS): </b> {dimension} </p>
-                <p> <b> Creation time (from OS): </b> {os_creation_time} </p>
-                <p> <b> Last modified time (from OS): </b> {os_last_modified_time} </p>
-                <p> <b> Last access time (from OS): </b> {os_last_access_time} </p>
-                <p> <b> {f_file} md5: </b> {md5} </p>
-                <p> <b> {f_file} sha1: </b> {sha1} </p>
+                <h2 class='sub_title'> {f_file}  </h2>
+                <p class='analysis_item'> <b> Dimension (bytes) (from OS): </b> {dimension} </p>
+                <p class='analysis_item'> <b> Creation time (from OS): </b> {os_creation_time} </p>
+                <p class='analysis_item'> <b> Last modified time (from OS): </b> {os_last_modified_time} </p>
+                <p class='analysis_item'> <b> Last access time (from OS): </b> {os_last_access_time} </p>
+                <p class='analysis_item'> <b> {f_file} md5: </b> {md5} </p>
+                <p class='analysis_item'> <b> {f_file} sha1: </b> {sha1} </p>
                 <hr>
                 """.format(
                     f_file=sep_file,
@@ -282,21 +282,21 @@ class OperaExporter(QtCore.QObject):
                     sha1=opera_f_info['file_sha1']
                 )
 
-        # Closing HTML "export_report"
-        html_string_export_report_close = """
-                </body >
-                </html >
-                """
+        # Closing "export_report"
+        html_string_report_close = """
+        </body >
+        </html >
+        """
 
-        # Creating "export_report_index"
+        # Writing "export_report_index"
         with open(export_report_index, "w") as f_report_index:
             f_report_index.write(
-                html_string_export_report_open +
+                html_string_report_open +
                 html_string_report_info +
                 html_string_report_opera_index +
                 html_string_report_opera_data +
                 html_string_report_opera_f_ +
-                html_string_export_report_close
+                html_string_report_close
             )
 
 
@@ -304,14 +304,17 @@ class OperaExporter(QtCore.QObject):
 # SECTION: EXPORT RESULTS #
 ###########################
 
-        # Opening HTML "export_results"
-        html_string_export_results_open = """
+        # Opening "index_results"
+        html_string_results_open = """
         <html>
-        <head> <title> {scan_date} </title>
+        <head> <title> {export_date} </title>
+        <link rel="stylesheet" type="text/css" href="file://{style_css}">
         """.format(
-            scan_date=current_datetime
+            export_date=current_datetime,
+            style_css=utils.EXPORT_OUTPUT_CSS_PATH
         )
 
+        # Table style
         html_string_results_table_style = """
         <script type="text/javascript" charset="utf8" src=file://{jquery}></script>
         <script type="text/javascript" charset="utf8" src=file://{jquery_tables}></script>
@@ -330,26 +333,29 @@ class OperaExporter(QtCore.QObject):
             jquery_datatables_css=utils.JQUERY_DATATABLES_CSS_PATH
         )
 
+        # Results info
         html_string_results_info = """
-        <h1> <b> Browser Cache Analyzer <br> Results report [{analysis_date}] </b> </h1>
-        <p> <b> Analysis folder: </b> {input_folder} </p>
-        <p> <b> Export folder: </b> {export_folder} </p>
-        <p> <b> Export md5: </b> {export_md5} </p>
-        <p> <b> Export sha1: </b> {export_sha1} </p>
-        <hr>
-        <p> <b> Number of entries in index header: </b> {index_entries} </p>
-        <p> <b> Number of found entries: </b> {found_entries} </p>
+        <h1 class='main_title'> <b> Browser Cache Analyzer <br> Results report [{export_date}] </b> </h1>
+        <h2 class='sub_title'> Export info </h2>
+        <p class='analysis_item'> <b> Analysis folder: </b> {input_folder} </p>
+        <p class='analysis_item'> <b> Export folder: </b> {export_folder} </p>
+        <p class='analysis_item'> <b> Export date: </b> {export_date} </p>
+        <p class='analysis_item'> <b> Export md5: </b> {export_md5} </p>
+        <p class='analysis_item'> <b> Export sha1: </b> {export_sha1} </p>
+        <p class='analysis_item'> <b> Number of entries in "index" header: </b> {index_entries} </p>
+        <p class='analysis_item'> <b> Number of found entries: </b> {found_entries} </p>
         <hr>
         """.format(
-            analysis_date=current_datetime_extended,
+            export_date=current_datetime_extended,
             input_folder=self.input_path,
             export_folder=os.path.join(self.export_path, self.export_folder_name),
             export_md5=self.export_md5,
             export_sha1=self.export_sha1,
             index_entries=opera_index_header['number_of_entries'],
-            found_entries=len(self.entries_to_export)
+            found_entries=num_entries_found
         )
 
+        # Table header
         html_string_results_table_header = """
         <table id="recap_table" class="display" cellspacing="0" width="100%">
         <thead>
@@ -364,26 +370,24 @@ class OperaExporter(QtCore.QObject):
         <tbody>
         """
 
-        # Starting export
-        self.worker_is_running = True
+        # Enabling "button_stop_export"
+        self.signal_enable_stop_button.emit()
 
+        # Table rows
         html_string_results_table_row = ""
         for idx, entry in enumerate(self.entries_to_export, 1):
-
-            # Enabling "button_stop_export"
-            if idx > 1:
-                self.signal_enable_stop_button.emit()
 
             # "Button_stop_export" clicked
             if self.signal_stop.is_set():
                 self.stopped_by_user = True
                 self.worker_is_running = False
+                self.signal_finished.emit()
                 break
 
             # Updating "progressBar_analysis"
             self.signal_update_export.emit(
                 idx,
-                len(self.entries_to_export)
+                num_entries_found
             )
 
             # Name for current entry
@@ -396,14 +400,15 @@ class OperaExporter(QtCore.QObject):
             # Table columns "#" and href for "Key Hash"
             html_string_results_table_row += """
             <tr>
-            <td> {idx} </td> <td> <a href = ./{file_entry_html} target=_blank> {hash} </td>
+            <td> {idx} </td> <td> <a href = ./{results_folder}/{file_entry_html} target=_blank> {hash} </td>
             """.format(
                 idx=format(idx, "02"),
+                results_folder=results_folder_name,
                 file_entry_html=entry_name + ".html",
                 hash=entry.key_hash
             )
 
-            # Columns "Content Type" and "Creation Time"
+            # Table columns "Content Type" and "Creation Time"
             if (entry.data_stream_addresses[0] and
                     isinstance(entry.data_stream_addresses[0].resource_data, dict)):
 
@@ -413,7 +418,17 @@ class OperaExporter(QtCore.QObject):
                     <td> {content_type} </td> <td> {key_data} </td> <td> {creation_time} </td>
                     </tr>
                     """.format(
-                        content_type=entry.data_stream_addresses[0].resource_data.get('Content-Type', "-"),
+                        content_type=entry.data_stream_addresses[0].resource_data['Content-Type'],
+                        key_data=entry.key_data[:75],
+                        creation_time=entry.creation_time
+                    )
+
+                # "Content-Type" not in HTTP header
+                else:
+                    html_string_results_table_row += """
+                    <td> - </td> <td> {key_data} </td> <td> {creation_time} </td>
+                    </tr>
+                    """.format(
                         key_data=entry.key_data[:75],
                         creation_time=entry.creation_time
                     )
@@ -428,38 +443,43 @@ class OperaExporter(QtCore.QObject):
                     creation_time=entry.creation_time
                 )
 
-            # Creating HTML file with entry info
+            # "Entry file"
             file_entry = os.path.join(export_results_path, entry_name)
             with open(file_entry + ".html", "w") as f_entry:
-                # Opening HTML file for the entry
+                # Opening "entry file"
                 html_string_file_entry_open = """
                 <html>
                 <head> <title> {entry_name} </title> </head>
+                <link rel="stylesheet" type="text/css" href="file://{style_css}">
                 <body>
                 """.format(
-                    entry_name=entry_name
+                    entry_name=entry_name,
+                    style_css=utils.EXPORT_OUTPUT_CSS_PATH
                 )
 
                 # Container file info
                 offset = 8192 + (entry.block_dimension * entry.block_number)
                 html_string_file_entry_container = """
-                <h2> Report for entry: {entry} </h2>
+                <h2 class='main_title'> Report for entry: {entry} </h2>
+                <h2 class='sub_title'> Export info </h2>
+                <p class='analysis_item'> <b> Analysis folder: </b> {input_folder} </p>
+                <p class='analysis_item'> <b> Export folder: </b> {export_folder} </p>
+                <p class='analysis_item'> <b> Export date: </b> {export_date} </p>
+                <p class='analysis_item'> <b> Export md5: </b> {export_md5} </p>
+                <p class='analysis_item'> <b> Export sha1: </b> {export_sha1} </p>
                 <hr>
-                <h3> Export info </h3>
-                <p> <b> Export date: </b> {export_date} </p>
-                <p> <b> Export md5: </b> {export_md5} </p>
-                <p> <b> Export sha1: </b> {export_sha1} </p>
-                <hr>
-                <h3> Container file </h3>
-                <p> <b> Container file: </b> {entry_file} </p>
-                <p> <b> Container file block dimension: </b> {block_dimension} </p>
-                <p> <b> Container file block number: </b> {block_number} </p>
-                <p> <b> Container file offset: </b> {offset} </p>
-                <p> <b> Container file md5: </b> {entry_file_md5}  </p>
-                <p> <b> Container file sha1: </b> {entry_file_sha1} </p>
+                <h2 class='sub_title'> Container file </h2>
+                <p class='analysis_item'> <b> Container file: </b> {entry_file} </p>
+                <p class='analysis_item'> <b> Container file block dimension: </b> {block_dimension} </p>
+                <p class='analysis_item'> <b> Container file block number: </b> {block_number} </p>
+                <p class='analysis_item'> <b> Container file offset: </b> {offset} </p>
+                <p class='analysis_item'> <b> Container file md5: </b> {entry_file_md5}  </p>
+                <p class='analysis_item'> <b> Container file sha1: </b> {entry_file_sha1} </p>
                 <hr>
                 """.format(
                     entry=entry.key_hash,
+                    input_folder=self.input_path,
+                    export_folder=os.path.join(self.export_path, self.export_folder_name),
                     export_date=current_datetime_extended,
                     export_md5=self.export_md5,
                     export_sha1=self.export_sha1,
@@ -467,23 +487,23 @@ class OperaExporter(QtCore.QObject):
                     block_dimension=entry.block_dimension,
                     block_number=entry.block_number,
                     offset=offset,
-                    entry_file_md5=utils.get_file_info(entry.entry_file)['file_md5'],
-                    entry_file_sha1=utils.get_file_info(entry.entry_file)['file_sha1'],
+                    entry_file_md5=utils.get_file_info(file_path=entry.entry_file)['file_md5'],
+                    entry_file_sha1=utils.get_file_info(file_path=entry.entry_file)['file_sha1'],
                 )
 
                 # Entry values
                 html_string_file_entry_values = """
-                <h3> Entry values </h3>
-                <p> <b> Key hash:  </b> {hash} </p>
-                <p> <b> Next entry address: </b> {next_addr} </p>
-                <p> <b> Reuse count:  </b> {reuse_count} </p>
-                <p> <b> Refetch count: </b> {refetch_count} </b> </p>
-                <p> <b> Cache entry state: </b> {entry_state} </p>
-                <p> <b> Creation time: </b> {creation_time} </p>
-                <p> <b> Key data size:  </b> {key_data_size} </p>
-                <p> <b> Long key cache data address: </b> {long_key_addr} </p>
-                <p> <b> Cache entry flags:  </b> {flags} </b> <br>
-                <p> <b> Key data:  </b> {key_data} </b> </p>
+                <h2 class='sub_title'> Entry values </h2>
+                <p class='analysis_item'> <b> Key hash:  </b> {hash} </p>
+                <p class='analysis_item'> <b> Next entry address: </b> {next_addr} </p>
+                <p class='analysis_item'> <b> Reuse count:  </b> {reuse_count} </p>
+                <p class='analysis_item'> <b> Refetch count: </b> {refetch_count} </b> </p>
+                <p class='analysis_item'> <b> Cache entry state: </b> {entry_state} </p>
+                <p class='analysis_item'> <b> Creation time: </b> {creation_time} </p>
+                <p class='analysis_item'> <b> Key data size:  </b> {key_data_size} </p>
+                <p class='analysis_item'> <b> Long key cache data address: </b> {long_key_addr} </p>
+                <p class='analysis_item'> <b> Cache entry flags:  </b> {flags} </b> <br>
+                <p class='analysis_item'> <b> Key data:  </b> {key_data} </b> </p>
                 <hr>
                 """.format(
                     hash=entry.key_hash,
@@ -516,13 +536,13 @@ class OperaExporter(QtCore.QObject):
 
                         # Values for the resource
                         html_string_resource_values += """
-                        <h3> Resource values (Header) </h3>
-                        <p> <b> Resource file:  </b> {resource_file} </p>
-                        <p> <b> File header dimension:  </b> {header_dimension} </p>
-                        <p> <b> Block dimension:  </b> {block_dimension} </p>
-                        <p> <b> Block number:  </b> {block_number} </p>
-                        <p> <b> Resource size:  </b> {resource_size} </p>
-                        <p> <b> Resource offset:  </b> {offset} </p>
+                        <h2 class='sub_title'> Resource values (Header) </h2>
+                        <p class='analysis_item'> <b> Resource file:  </b> {resource_file} </p>
+                        <p class='analysis_item'> <b> File header dimension:  </b> {header_dimension} </p>
+                        <p class='analysis_item'> <b> Block dimension:  </b> {block_dimension} </p>
+                        <p class='analysis_item'> <b> Block number:  </b> {block_number} </p>
+                        <p class='analysis_item'> <b> Resource size:  </b> {resource_size} </p>
+                        <p class='analysis_item'> <b> Resource offset:  </b> {offset} </p>
                         <hr>
                         """.format(
                             resource_file=resource_file,
@@ -533,31 +553,32 @@ class OperaExporter(QtCore.QObject):
                             offset=resource_offset
                         )
 
-                        # Reading file containing the resource
+                        # File containing the resource
                         with open(resource_file, "rb") as f_resource:
                             f_resource.seek(resource_offset)
                             resource_data = f_resource.read(resource_size)
 
-                            # Creating file to save the resource read
+                            # File to save the resource read
                             with open(file_entry_data, "wb") as f_entry_data:
                                 f_entry_data.write(resource_data)
 
                         # Resource is HTTP Header
-                        if item and isinstance(item.resource_data, dict):
+                        if item and isinstance(item.resource_data, dict) and item.resource_data:
                             # Values for the HTTP Header
                             html_string_file_http_header += """
-                            <h3> Header </h3>
+                            <h2 class='sub_title'> Header </h2>
                             """
 
                             # Header keys (tags) and values
                             for key, key_value in item.resource_data.iteritems():
                                 html_string_file_http_header += """
-                                <p> <b> {key}: </b> {key_value} </p>
+                                <p class='analysis_item'> <b> {key}: </b> {key_value} </p>
                                 """.format(
                                     key=key,
                                     key_value=key_value
                                 )
 
+                            # Updating HTTP Header
                             html_string_file_http_header += """
                             <hr>
                             """
@@ -569,7 +590,6 @@ class OperaExporter(QtCore.QObject):
 
                             # Key data not in separate file
                             if item.file_type != "000":
-
                                 header_dimension = 8192
                                 resource_file = item.resource_file
                                 block_dimension = item.block_dimension
@@ -579,13 +599,13 @@ class OperaExporter(QtCore.QObject):
 
                                 # Values for the resource
                                 html_string_resource_values += """
-                                <h3> Resource values (Data) </h3>
-                                <p> <b> Resource file:  </b> {resource_file} </p>
-                                <p> <b> File header dimension:  </b> {header_dimension} </p>
-                                <p> <b> Block dimension:  </b> {block_dimension} </p>
-                                <p> <b> Block number:  </b> {block_number} </p>
-                                <p> <b> Resource size:  </b> {resource_size} </p>
-                                <p> <b> Resource offset:  </b> {offset} </p>
+                                <h2 class='sub_title'> Resource values (Data) </h2>
+                                <p class='analysis_item'> <b> Resource file:  </b> {resource_file} </p>
+                                <p class='analysis_item'> <b> File header dimension:  </b> {header_dimension} </p>
+                                <p class='analysis_item'> <b> Block dimension:  </b> {block_dimension} </p>
+                                <p class='analysis_item'> <b> Block number:  </b> {block_number} </p>
+                                <p class='analysis_item'> <b> Resource size:  </b> {resource_size} </p>
+                                <p class='analysis_item'> <b> Resource offset:  </b> {offset} </p>
                                 <hr>
                                 """.format(
                                     resource_file=resource_file,
@@ -596,21 +616,21 @@ class OperaExporter(QtCore.QObject):
                                     offset=resource_offset
                                 )
 
-                                # Creating file to save the resource read
+                                # File to save the resource read
                                 with open(file_entry_data, "wb") as f_entry_data:
                                     f_entry_data.write(str(item.resource_data))
 
                             # Copying separate file if key data is in a separate file
                             else:
-                                shutil.copy(item.resource_file, file_entry_data)
+                                shutil.copy2(item.resource_file, file_entry_data)
 
-                #  Closing HTML file for the entry
+                # Closing "entry file"
                 html_string_file_entry_close = """
                                 </body>
                                 </html>
                                 """
 
-                # Writing file for the entry
+                # Writing "entry file"
                 f_entry.write(html_string_file_entry_open +
                               html_string_file_entry_container +
                               html_string_file_entry_values +
@@ -619,18 +639,18 @@ class OperaExporter(QtCore.QObject):
                               html_string_file_entry_close
                               )
 
-        # Closing HTML "export_results"
+        # Closing "index_results"
         html_string_results_close = """
-                </tbody>
-                </table>
-                </body>
-                </html>
-                """
+        </tbody>
+        </table>
+        </body>
+        </html>
+        """
 
-        # Creating "export_results_index"
-        with open(export_results_index, "w") as f_scan_index:
-            f_scan_index.write(
-                html_string_export_results_open +
+        # Writing "export_results_index"
+        with open(export_results_index, "w") as f_export_index:
+            f_export_index.write(
+                html_string_results_open +
                 html_string_results_table_style +
                 html_string_results_info +
                 html_string_results_table_header +

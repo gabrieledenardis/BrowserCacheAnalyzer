@@ -26,16 +26,18 @@ class FirefoxAnalyzer(QtCore.QObject):
     def __init__(self, parent=None, input_path=None):
         super(FirefoxAnalyzer, self).__init__(parent)
 
-        # Signal from "button_stop_analysis"
-        self.signal_stop = Event()
-        # Thread stopped by user
-        self.stopped_by_user = False
-        # Analysis running
-        self.worker_is_running = True
         # Input path to analyze
         self.input_path = input_path
         # List of all cache entries found
         self.list_cache_entries = []
+
+        # Thread stopped by user
+        self.stopped_by_user = False
+        # Analysis running
+        self.worker_is_running = True
+
+        # Signal from "button_stop_analysis"
+        self.signal_stop = Event()
 
     def analyze_cache(self):
         """Analyzing a Firefox cache input path updating a list with all entries found.
@@ -82,13 +84,6 @@ class FirefoxAnalyzer(QtCore.QObject):
                         stop = i + 1
                         url_hash += format(struct.unpack(">B", record[start:stop])[0], "X").zfill(2)
 
-                    # # Record values
-                    # url_hash = ""
-                    # for i in range(0, 20, 4):
-                    #     start = i
-                    #     stop = i + 4
-                    #     url_hash += format(struct.unpack(">I", record[start:stop])[0], "X")
-
                     frequency = struct.unpack(">I", record[20:24])[0]
                     expire_date_unix = struct.unpack(">I", record[24:28])[0]
                     expire_date = datetime.datetime.fromtimestamp(expire_date_unix).strftime("%A - %d %B %Y - %H:%M:%S")
@@ -106,8 +101,8 @@ class FirefoxAnalyzer(QtCore.QObject):
                         file_size=file_size
                     )
 
-                    # Avoiding not continuously updating effects on "table_analysis_preview"
-                    time.sleep(0.01)
+                    # Avoiding not continuously updating effect on "table_analysis_preview"
+                    time.sleep(0.02)
 
                     # Values from resource
                     resource_uri = cache_entry_instance.resource_uri
@@ -137,18 +132,6 @@ class FirefoxAnalyzer(QtCore.QObject):
 
                     # Updating "list_cache_entries"
                     self.list_cache_entries.append(cache_entry_instance)
-
-        # Entries in "index" and in "entries" folder
-        list_entry_in = []
-        for idx, entry in enumerate(self.list_cache_entries):
-            if entry.url_hash in os.listdir(entries_path):
-                list_entry_in.append(entry.url_hash)
-
-        # Entries in "entries" folder but not in "index"
-        count = 0
-        for item in os.listdir(entries_path):
-            if item not in list_entry_in:
-                count += 1
 
         # Analysis terminated
         self.worker_is_running = False

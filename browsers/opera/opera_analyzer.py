@@ -26,16 +26,18 @@ class OperaAnalyzer(QtCore.QObject):
     def __init__(self, parent=None, input_path=None):
         super(OperaAnalyzer, self).__init__(parent)
 
-        # Signal from "button_stop_analysis"
-        self.signal_stop = Event()
-        # Thread stopped by user
-        self.stopped_by_user = False
-        # Analysis running
-        self.worker_is_running = True
         # Input path to analyze
         self.input_path = input_path
         # List of all cache entries found
         self.list_cache_entries = []
+
+        # Thread stopped by user
+        self.stopped_by_user = False
+        # Analysis running
+        self.worker_is_running = True
+
+        # Signal from "button_stop_analysis"
+        self.signal_stop = Event()
 
     def analyze_cache(self):
         """Analyzing an Opera cache input path updating a list with all entries found.
@@ -58,7 +60,7 @@ class OperaAnalyzer(QtCore.QObject):
             f_index.seek(index_header_dimension)
 
             # Addresses table in "index" file
-            for addresses in range(table_size):
+            for address in range(table_size):
                 # "Button_stop_analysis" clicked
                 if self.signal_stop.is_set():
                     self.stopped_by_user = True
@@ -84,7 +86,7 @@ class OperaAnalyzer(QtCore.QObject):
                     )
 
                     # If an entry has a valid next entry address (an entry with the same hash),
-                    # adding it to the entries list. Those entries are not in index table addresses
+                    # adding it to the entries list. Those entries are not in "index table addresses"
                     while cache_entry_instance.next_entry_address != 0:
                         if (cache_entry_instance.data_stream_addresses[0] is not None and
                                 isinstance(cache_entry_instance.data_stream_addresses[0].resource_data, dict)):
