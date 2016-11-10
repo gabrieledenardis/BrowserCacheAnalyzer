@@ -13,7 +13,7 @@ def read_data_header(data_to_open=None):
 
     with open(data_to_open, "rb") as f_data:
         # Data_header_fields
-        signature = struct.unpack("<I", f_data.read(4))[0]
+        signature = format(struct.unpack("<I", f_data.read(4))[0], "X")
         minor_version = struct.unpack("<h", f_data.read(2))[0]
         major_version = struct.unpack("<h", f_data.read(2))[0]
         file_number = struct.unpack("<h", f_data.read(2))[0]

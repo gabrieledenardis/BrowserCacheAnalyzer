@@ -16,12 +16,12 @@ def read_index_header(index_file=None):
 
     with open(index_file, "rb") as f_index:
         # Index file header fields
-        signature = struct.unpack("<I", f_index.read(4))[0]
+        signature = format(struct.unpack("<I", f_index.read(4))[0], "X")
         minor_version = struct.unpack("<h", f_index.read(2))[0]
         major_version = struct.unpack("<h", f_index.read(2))[0]
         number_of_entries = struct.unpack("<I", f_index.read(4))[0]
         stored_data_size = struct.unpack("<I", f_index.read(4))[0]
-        last_created_file_f = struct.unpack("<I", f_index.read(4))[0]
+        last_created_file_f = format(struct.unpack("<I", f_index.read(4))[0], "06")
         dirty_flag = struct.unpack("<I", f_index.read(4))[0]
         usage_statistics = struct.unpack("<I", f_index.read(4))[0]
         table_size = struct.unpack("<I", f_index.read(4))[0]

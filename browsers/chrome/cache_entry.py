@@ -42,7 +42,7 @@ class CacheEntry(object):
                 f_entry.seek(data_header_dimension + (self.block_dimension * self.block_number))
 
                 # Entry values
-                self.key_hash = struct.unpack("<I", f_entry.read(4))[0]
+                self.key_hash = format(struct.unpack("<I", f_entry.read(4))[0], "X").zfill(8)
                 self.next_entry_address = struct.unpack("<I", f_entry.read(4))[0]
                 self.rankings_node_address = format(struct.unpack("<I", f_entry.read(4))[0], "032b")
                 self.reuse_count = struct.unpack("<I", f_entry.read(4))[0]

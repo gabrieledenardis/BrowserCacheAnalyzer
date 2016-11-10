@@ -194,12 +194,12 @@ class ChromeExporter(QtCore.QObject):
         <hr>
         """.format(
             index_file=chrome_index_file,
-            signature=format(chrome_index_header['signature'], "X"),
+            signature=chrome_index_header['signature'],
             minor_version=chrome_index_header['minor_version'],
             major_version=chrome_index_header['major_version'],
             entries=chrome_index_header['number_of_entries'],
             stored_data=chrome_index_header['stored_data_size'],
-            last_f_file=format(chrome_index_header['last_created_file_f'], "06"),
+            last_f_file=chrome_index_header['last_created_file_f'],
             table_size=chrome_index_header['table_size'],
             creation_time=chrome_index_header['creation_time'],
             md5=chrome_index_info['file_md5'],
@@ -239,7 +239,7 @@ class ChromeExporter(QtCore.QObject):
                 <hr>
                 """.format(
                     data_file=data_file,
-                    signature=format(chrome_data_header['signature'], "X"),
+                    signature=chrome_data_header['signature'],
                     minor_version=chrome_data_header['minor_version'],
                     major_version=chrome_data_header['major_version'],
                     file_number=chrome_data_header['file_number'],

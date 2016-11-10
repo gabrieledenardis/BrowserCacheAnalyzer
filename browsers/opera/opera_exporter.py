@@ -194,12 +194,12 @@ class OperaExporter(QtCore.QObject):
         <hr>
         """.format(
             index_file=opera_index_file,
-            signature=format(opera_index_header['signature'], "X"),
+            signature=opera_index_header['signature'],
             minor_version=opera_index_header['minor_version'],
             major_version=opera_index_header['major_version'],
             entries=opera_index_header['number_of_entries'],
             stored_data=opera_index_header['stored_data_size'],
-            last_f_file=format(opera_index_header['last_created_file_f'], "06"),
+            last_f_file=opera_index_header['last_created_file_f'],
             table_size=opera_index_header['table_size'],
             creation_time=opera_index_header['creation_time'],
             md5=opera_index_info['file_md5'],
@@ -239,7 +239,7 @@ class OperaExporter(QtCore.QObject):
                 <hr>
                 """.format(
                     data_file=data_file,
-                    signature=format(opera_data_header['signature'], "X"),
+                    signature=opera_data_header['signature'],
                     minor_version=opera_data_header['minor_version'],
                     major_version=opera_data_header['major_version'],
                     file_number=opera_data_header['file_number'],
