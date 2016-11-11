@@ -8,6 +8,7 @@ from PyQt4 import QtCore
 from threading import Event
 import platform
 import datetime
+import shutil
 import os
 
 # Project imports
@@ -84,6 +85,14 @@ class FirefoxExporter(QtCore.QObject):
         export_report_index = os.path.join(self.export_path, self.export_folder_name, "index_report.html")
         export_results_index = os.path.join(self.export_path, self.export_folder_name, "index_results.html")
 
+        # Static folder (for jquery and css)
+        static_folder = os.path.join(self.export_path, self.export_folder_name, "_static")
+        shutil.copytree(utils.STATIC_FOLDER, static_folder)
+        export_output_style_path = "/".join(("_static", "application_css", "export_output_style.css"))
+        jquery_path = "/".join(("_static", "js", "jquery-3.1.1.min.js"))
+        jquery_datatables_path = "/".join(("_static", "js", "jquery.dataTables.js"))
+        jquery_datatables_css_path = "/".join(("_static", "jquery_datatables_css", "jquery.dataTables.css"))
+
         # Path to sub folder containing entries
         entries_path = os.path.join(self.input_path, "entries")
 
@@ -108,12 +117,12 @@ class FirefoxExporter(QtCore.QObject):
         html_string_report_open = """
         <html>
         <head> <title> {export_date} </title>
-        <link rel="stylesheet" type="text/css" href="file://{style_css}">
+        <link rel="stylesheet" type="text/css" href="{style_css}">
         </head>
         <body>
         """.format(
             export_date=current_datetime,
-            style_css=utils.EXPORT_OUTPUT_CSS_PATH
+            style_css=export_output_style_path
         )
 
         # Report info
@@ -187,7 +196,7 @@ class FirefoxExporter(QtCore.QObject):
             entry_folder_elements=entry_folder_info['folder_elements'],
             entry_folder_creation_time=entry_folder_info['folder_creation_time'],
             entry_folder_modified_time=entry_folder_info['folder_last_modified_time'],
-            entry_folder_last_access=entry_folder_info['folder_last_access_time'],
+            entry_folder_last_access=entry_folder_info['folder_last_access_time']
         )
 
         # Firefox "index" file values
@@ -267,17 +276,17 @@ class FirefoxExporter(QtCore.QObject):
         html_string_results_open = """
             <html>
             <head> <title> {export_date} </title>
-            <link rel="stylesheet" type="text/css" href="file://{style_css}">
+            <link rel="stylesheet" type="text/css" href="{style_css}">
             """.format(
             export_date=current_datetime,
-            style_css=utils.EXPORT_OUTPUT_CSS_PATH
+            style_css=export_output_style_path
         )
 
         # Table style
         html_string_results_table_style = """
-        <script type="text/javascript" charset="utf8" src=file://{jquery}></script>
-        <script type="text/javascript" charset="utf8" src=file://{jquery_tables}></script>
-        <link rel="stylesheet" type="text/css" href="file://{jquery_datatables_css}">
+        <script type="text/javascript" charset="utf8" src="{jquery}"></script>
+        <script type="text/javascript" charset="utf8" src="{jquery_tables}"></script>
+        <link rel="stylesheet" type="text/css" href="{jquery_datatables_css}">
 
         <script>
         $(function() {{
@@ -287,9 +296,9 @@ class FirefoxExporter(QtCore.QObject):
         </head>
         <body>
         """.format(
-            jquery=utils.JQUERY_PATH,
-            jquery_tables=utils.JQUERY_TABLES_PATH,
-            jquery_datatables_css=utils.JQUERY_DATATABLES_CSS_PATH,
+            jquery=jquery_path,
+            jquery_tables=jquery_datatables_path,
+            jquery_datatables_css=jquery_datatables_css_path
         )
 
         # Results info
@@ -360,7 +369,7 @@ class FirefoxExporter(QtCore.QObject):
             # Table columns "#" and href for "Key Hash"
             html_string_results_table_row += """
             <tr>
-            <td> {idx} </td> <td> <a href = ./{results_folder}/{file_entry_html} target=_blank> {hash} </td>
+            <td> {idx} </td> <td> <a href = {results_folder}/{file_entry_html} target=_blank> {hash} </td>
             """.format(
                 idx=format(idx, "02"),
                 results_folder=results_folder_name,
@@ -388,11 +397,11 @@ class FirefoxExporter(QtCore.QObject):
                 html_string_file_entry_open = """
                 <html>
                 <head> <title> {entry_name} </title> </head>
-                <link rel="stylesheet" type="text/css" href="file://{style_css}">
+                <link rel="stylesheet" type="text/css" href="../{style_css}">
                 <body>
                 """.format(
                     entry_name=entry_name,
-                    style_css=utils.EXPORT_OUTPUT_CSS_PATH
+                    style_css=export_output_style_path
                 )
 
                 # Entry is in "entries" folder
@@ -420,7 +429,7 @@ class FirefoxExporter(QtCore.QObject):
                         export_sha1=self.export_sha1,
                         entry_file=entry.entry_file_path,
                         entry_file_md5=utils.get_file_info(file_path=entry.entry_file_path)['file_md5'],
-                        entry_file_sha1=utils.get_file_info(file_path=entry.entry_file_path)['file_sha1'],
+                        entry_file_sha1=utils.get_file_info(file_path=entry.entry_file_path)['file_sha1']
                     )
 
                     # Entry values
@@ -544,17 +553,17 @@ class FirefoxExporter(QtCore.QObject):
         html_string_results_open = """
         <html>
         <head> <title> {export_date} </title>
-        <link rel="stylesheet" type="text/css" href="file://{style_css}">
+        <link rel="stylesheet" type="text/css" href="{style_css}">
         """.format(
             export_date=current_datetime,
-            style_css=utils.EXPORT_OUTPUT_CSS_PATH
+            style_css=export_output_style_path
         )
 
         # Table style
         html_string_results_table_style = """
-        <script type="text/javascript" charset="utf8" src=file://{jquery}></script>
-        <script type="text/javascript" charset="utf8" src=file://{jquery_tables}></script>
-        <link rel="stylesheet" type="text/css" href="file://{jquery_datatables_css}">
+        <script type="text/javascript" charset="utf8" src="{jquery}"></script>
+        <script type="text/javascript" charset="utf8" src="{jquery_tables}"></script>
+        <link rel="stylesheet" type="text/css" href="{jquery_datatables_css}">
 
         <script>
         $(function() {{
@@ -564,9 +573,9 @@ class FirefoxExporter(QtCore.QObject):
         </head>
         <body>
         """.format(
-            jquery=utils.JQUERY_PATH,
-            jquery_tables=utils.JQUERY_TABLES_PATH,
-            jquery_datatables_css=utils.JQUERY_DATATABLES_CSS_PATH,
+            jquery=jquery_path,
+            jquery_tables=jquery_datatables_path,
+            jquery_datatables_css=jquery_datatables_css_path
         )
 
         # Results info
@@ -644,7 +653,7 @@ class FirefoxExporter(QtCore.QObject):
                 # Table columns "#" and href for "Key Hash"
                 html_string_results_table_row += """
                 <tr>
-                <td> {idx} </td> <td> <a href = ./{not_in_index_folder}/{file_entry_html} target=_blank> {hash} </td>
+                <td> {idx} </td> <td> <a href = {not_in_index_folder}/{file_entry_html} target=_blank> {hash} </td>
                 """.format(
                     idx=format(count, "02"),
                     not_in_index_folder=not_in_index_name,
@@ -667,11 +676,11 @@ class FirefoxExporter(QtCore.QObject):
                     html_string_file_entry_open = """
                     <html>
                     <head> <title> {entry_name} </title> </head>
-                    <link rel="stylesheet" type="text/css" href="file://{style_css}">
+                    <link rel="stylesheet" type="text/css" href="../{style_css}">
                     <body>
                     """.format(
                         entry_name=entry_name,
-                        style_css=utils.EXPORT_OUTPUT_CSS_PATH
+                        style_css=export_output_style_path
                     )
 
                     # "Entry" file container
@@ -701,8 +710,8 @@ class FirefoxExporter(QtCore.QObject):
                             file_path=cache_resource_instance.resource_file_path
                         )['file_md5'],
                         entry_file_sha1=utils.get_file_info(
-                            file_path=cache_resource_instance.resource_file_path,
-                         )['file_sha1'],
+                            file_path=cache_resource_instance.resource_file_path
+                         )['file_sha1']
                     )
 
                     # Entry values

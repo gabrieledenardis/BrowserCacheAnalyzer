@@ -55,7 +55,7 @@
       </property>
       <property name="font">
        <font>
-        <family>Open Sans</family>
+        <family>Ebrima</family>
         <pointsize>13</pointsize>
        </font>
       </property>
@@ -184,7 +184,7 @@
       </property>
       <property name="font">
        <font>
-        <family>Open Sans</family>
+        <family>Ebrima</family>
         <pointsize>13</pointsize>
        </font>
       </property>
@@ -512,7 +512,7 @@
         </property>
         <property name="font">
          <font>
-          <family>Open Sans</family>
+          <family>Ebrima</family>
           <pointsize>24</pointsize>
          </font>
         </property>
@@ -526,7 +526,7 @@
     <item row="3" column="0" colspan="2">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>5</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="page">
        <layout class="QGridLayout" name="gridLayout_10">
@@ -536,19 +536,19 @@
            <widget class="QPushButton" name="button_search_installed_browsers">
             <property name="minimumSize">
              <size>
-              <width>240</width>
+              <width>210</width>
               <height>30</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>240</width>
+              <width>210</width>
               <height>30</height>
              </size>
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -558,7 +558,7 @@
              <enum>Qt::RightToLeft</enum>
             </property>
             <property name="text">
-             <string>        Search for installed browsers</string>
+             <string>     Search for installed browsers</string>
             </property>
             <property name="icon">
              <iconset resource="icons.qrc">
@@ -601,7 +601,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -646,7 +646,7 @@
            <widget class="QLabel" name="label_9">
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>24</pointsize>
              </font>
             </property>
@@ -831,7 +831,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -841,7 +841,7 @@
              <enum>Qt::RightToLeft</enum>
             </property>
             <property name="text">
-             <string>    Select cache folder</string>
+             <string>      Select cache folder</string>
             </property>
             <property name="icon">
              <iconset resource="icons.qrc">
@@ -890,7 +890,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -917,7 +917,7 @@
          <widget class="QGroupBox" name="groupBox_portable_browsers">
           <property name="font">
            <font>
-            <family>Open Sans</family>
+            <family>Ebrima</family>
             <pointsize>13</pointsize>
            </font>
           </property>
@@ -1217,7 +1217,7 @@
          <widget class="QGroupBox" name="groupBox_installed_browsers">
           <property name="font">
            <font>
-            <family>Open Sans</family>
+            <family>Ebrima</family>
             <pointsize>13</pointsize>
            </font>
           </property>
@@ -1229,7 +1229,8 @@
             <widget class="QTableWidget" name="table_installed_browsers">
              <property name="font">
               <font>
-               <family>Open Sans</family>
+               <family>Ebrima</family>
+               <pointsize>9</pointsize>
               </font>
              </property>
             </widget>
@@ -1319,7 +1320,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -1329,7 +1330,7 @@
              <enum>Qt::RightToLeft</enum>
             </property>
             <property name="text">
-             <string>    Select cache folder</string>
+             <string>      Select cache folder</string>
             </property>
             <property name="icon">
              <iconset resource="icons.qrc">
@@ -1372,7 +1373,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -1403,7 +1404,7 @@
          <widget class="QGroupBox" name="groupBox_input_folder">
           <property name="font">
            <font>
-            <family>Open Sans</family>
+            <family>Ebrima</family>
             <pointsize>13</pointsize>
            </font>
           </property>
@@ -1417,7 +1418,7 @@
               <widget class="QLabel" name="label_19">
                <property name="font">
                 <font>
-                 <family>Open Sans</family>
+                 <family>Ebrima</family>
                  <pointsize>9</pointsize>
                  <weight>75</weight>
                  <bold>true</bold>
@@ -1444,7 +1445,7 @@
                </property>
                <property name="font">
                 <font>
-                 <family>Open Sans</family>
+                 <family>Ebrima</family>
                  <pointsize>9</pointsize>
                 </font>
                </property>
@@ -1454,7 +1455,7 @@
               <widget class="QLabel" name="label_20">
                <property name="font">
                 <font>
-                 <family>Open Sans</family>
+                 <family>Ebrima</family>
                  <pointsize>9</pointsize>
                  <weight>75</weight>
                  <bold>true</bold>
@@ -1481,7 +1482,7 @@
                </property>
                <property name="font">
                 <font>
-                 <family>Open Sans</family>
+                 <family>Ebrima</family>
                  <pointsize>9</pointsize>
                 </font>
                </property>
@@ -1491,7 +1492,7 @@
               <widget class="QLabel" name="label_21">
                <property name="font">
                 <font>
-                 <family>Open Sans</family>
+                 <family>Ebrima</family>
                  <pointsize>9</pointsize>
                  <weight>75</weight>
                  <bold>true</bold>
@@ -1518,7 +1519,7 @@
                </property>
                <property name="font">
                 <font>
-                 <family>Open Sans</family>
+                 <family>Ebrima</family>
                  <pointsize>9</pointsize>
                 </font>
                </property>
@@ -1528,7 +1529,7 @@
               <widget class="QLabel" name="label_22">
                <property name="font">
                 <font>
-                 <family>Open Sans</family>
+                 <family>Ebrima</family>
                  <pointsize>9</pointsize>
                  <weight>75</weight>
                  <bold>true</bold>
@@ -1555,7 +1556,7 @@
                </property>
                <property name="font">
                 <font>
-                 <family>Open Sans</family>
+                 <family>Ebrima</family>
                  <pointsize>9</pointsize>
                 </font>
                </property>
@@ -1565,7 +1566,7 @@
               <widget class="QLabel" name="label_23">
                <property name="font">
                 <font>
-                 <family>Open Sans</family>
+                 <family>Ebrima</family>
                  <pointsize>9</pointsize>
                  <weight>75</weight>
                  <bold>true</bold>
@@ -1592,7 +1593,7 @@
                </property>
                <property name="font">
                 <font>
-                 <family>Open Sans</family>
+                 <family>Ebrima</family>
                  <pointsize>9</pointsize>
                 </font>
                </property>
@@ -1624,7 +1625,7 @@
                </property>
                <property name="font">
                 <font>
-                 <family>Open Sans</family>
+                 <family>Ebrima</family>
                  <pointsize>9</pointsize>
                  <weight>75</weight>
                  <bold>true</bold>
@@ -1657,7 +1658,7 @@
                </property>
                <property name="font">
                 <font>
-                 <family>Open Sans</family>
+                 <family>Ebrima</family>
                  <pointsize>9</pointsize>
                  <weight>75</weight>
                  <bold>true</bold>
@@ -1700,7 +1701,7 @@
               <widget class="QLabel" name="label_18">
                <property name="font">
                 <font>
-                 <family>Open Sans</family>
+                 <family>Ebrima</family>
                  <pointsize>9</pointsize>
                  <weight>75</weight>
                  <bold>true</bold>
@@ -1771,7 +1772,7 @@
           </property>
           <property name="font">
            <font>
-            <family>Open Sans</family>
+            <family>Ebrima</family>
             <pointsize>10</pointsize>
            </font>
           </property>
@@ -2124,7 +2125,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -2134,7 +2135,7 @@
              <enum>Qt::RightToLeft</enum>
             </property>
             <property name="text">
-             <string>    Confirm and start analysis</string>
+             <string>      Confirm and start analysis</string>
             </property>
             <property name="icon">
              <iconset resource="icons.qrc">
@@ -2170,7 +2171,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -2246,7 +2247,7 @@
          <widget class="QGroupBox" name="groupBox_analysis_preview">
           <property name="font">
            <font>
-            <family>Open Sans</family>
+            <family>Ebrima</family>
             <pointsize>13</pointsize>
            </font>
           </property>
@@ -2309,7 +2310,7 @@
             <widget class="QTableWidget" name="table_analysis_preview">
              <property name="font">
               <font>
-               <family>Open Sans</family>
+               <family>Ebrima</family>
                <pointsize>8</pointsize>
               </font>
              </property>
@@ -2355,7 +2356,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -2398,7 +2399,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -2444,7 +2445,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -2454,7 +2455,7 @@
              <enum>Qt::RightToLeft</enum>
             </property>
             <property name="text">
-             <string>    Export to HTML</string>
+             <string>      Export to HTML</string>
             </property>
             <property name="icon">
              <iconset resource="icons.qrc">
@@ -2490,7 +2491,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -2556,7 +2557,7 @@
          <widget class="QGroupBox" name="groupBox_export">
           <property name="font">
            <font>
-            <family>Open Sans</family>
+            <family>Ebrima</family>
             <pointsize>13</pointsize>
            </font>
           </property>
@@ -2733,7 +2734,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -2773,7 +2774,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -2819,7 +2820,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -2865,7 +2866,7 @@
             </property>
             <property name="font">
              <font>
-              <family>Open Sans</family>
+              <family>Ebrima</family>
               <pointsize>9</pointsize>
               <weight>75</weight>
               <bold>true</bold>

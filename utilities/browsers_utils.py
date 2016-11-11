@@ -225,6 +225,42 @@ def check_valid_cache_path(browser=None, cache_path=None):
 # Browsers cache default paths
 BROWSERS_DEFAULT_CACHE_PATHS = {
 
+    ("chrome", "windows", "7"): os.path.join(
+        "C:", os.sep, "Users", unicode(os.environ['USERNAME']), "AppData", "Local", "Google", "Chrome", "User Data",
+        "Default", "Cache"
+    ),
+
+    ("firefox", "windows", "7"): get_firefox_default_cache_path(),
+
+    ("opera", "windows", "7"): os.path.join(
+        "C:", os.sep, "Users", unicode(os.environ['USERNAME']), "AppData", "Local", "Opera Software", "Opera Stable",
+        "Cache"
+    ),
+
+    ("chrome", "windows", "8"): os.path.join(
+        "C:", os.sep, "Users", unicode(os.environ['USERNAME']), "AppData", "Local", "Google", "Chrome", "User Data",
+        "Default", "Cache"
+    ),
+
+    ("firefox", "windows", "8"): get_firefox_default_cache_path(),
+
+    ("opera", "windows", "8"): os.path.join(
+        "C:", os.sep, "Users", unicode(os.environ['USERNAME']), "AppData", "Local", "Opera Software", "Opera Stable",
+        "Cache"
+    ),
+
+    ("chrome", "windows", "8.1"): os.path.join(
+        "C:", os.sep, "Users", unicode(os.environ['USERNAME']), "AppData", "Local", "Google", "Chrome", "User Data",
+        "Default", "Cache"
+    ),
+
+    ("firefox", "windows", "8.1"): get_firefox_default_cache_path(),
+
+    ("opera", "windows", "8.1"): os.path.join(
+        "C:", os.sep, "Users", unicode(os.environ['USERNAME']), "AppData", "Local", "Opera Software", "Opera Stable",
+        "Cache"
+    ),
+
     ("chrome", "windows", "10"): os.path.join(
         "C:", os.sep, "Users", unicode(os.environ['USERNAME']), "AppData", "Local", "Google", "Chrome", "User Data",
         "Default", "Cache"

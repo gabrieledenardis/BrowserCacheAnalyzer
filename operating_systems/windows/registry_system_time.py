@@ -7,6 +7,7 @@ try:
 except ImportError:
     _winreg = None
 
+import platform
 import struct
 
 # Project imports
@@ -31,30 +32,40 @@ def get_registry_time_info():
     sync_type = None
     time_zone = None
 
+    # Current version for Microsoft Windows
+    current_win_version = platform.release()
+
     # W32TIME_CONFIG
-    try:
-        # Opening w32time_config key
-        w32time_config = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, utils.W32TIME_CONFIG, 0, _winreg.KEY_READ)
 
-        # Searching in key values
-        for val in range(_winreg.QueryInfoKey(w32time_config)[1]):
-            try:
-                # Searching for "LastKnownGoodTime"
-                value_name, value_data, value_data_type = _winreg.EnumValue(w32time_config, val)
+    # Windows 7, 8, 8.1
+    if current_win_version != "10":
+        last_known_time = "Not available"
 
-                if value_name == "LastKnownGoodTime":
-                    # Value expressed in units of 100 nanoseconds from 01 Jan 1601
-                    last_known_time = struct.unpack('<Q', value_data)[0]
+    # Windows 10
+    else:
+        try:
+            # Opening w32time_config key
+            w32time_config = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, utils.W32TIME_CONFIG, 0, _winreg.KEY_READ)
 
-            except WindowsError as _:
-                pass
+            # Searching in key values
+            for val in range(_winreg.QueryInfoKey(w32time_config)[1]):
+                try:
+                    # Searching for "LastKnownGoodTime"
+                    value_name, value_data, value_data_type = _winreg.EnumValue(w32time_config, val)
 
-    except WindowsError as _:
-        pass
+                    if value_name == "LastKnownGoodTime":
+                        # Value expressed in units of 100 nanoseconds from 01 Jan 1601
+                        last_known_time = struct.unpack('<Q', value_data)[0]
 
-    finally:
-        # Closing w32time_config key
-        _winreg.CloseKey(w32time_config)
+                except WindowsError as _:
+                    pass
+
+        except WindowsError as _:
+            pass
+
+        finally:
+            # Closing w32time_config key
+            _winreg.CloseKey(w32time_config)
 
     # W32TIME_PARAMETERS
     try:
@@ -84,34 +95,41 @@ def get_registry_time_info():
         _winreg.CloseKey(w32time_parameters)
 
     # W32TIME_TIME_PROVIDERS
-    try:
-        # Opening w32time_time_providers key
-        w32time_time_providers = _winreg.OpenKey(
-            _winreg.HKEY_LOCAL_MACHINE,
-            utils.W32TIME_TIME_PROVIDERS,
-            0,
-            _winreg.KEY_READ
-        )
 
-        # Searching in key values
-        for val in range(_winreg.QueryInfoKey(w32time_time_providers)[1]):
-            try:
-                # Searching for "SpecialPollInterval"
-                value_name, value_data, value_data_type = _winreg.EnumValue(w32time_time_providers, val)
+    # Windows 7, 8, 8.1
+    if current_win_version != "10":
+        special_poll_interval = "Not available"
 
-                if value_name == "SpecialPollInterval":
-                    # Value expressed in seconds
-                    special_poll_interval = value_data
+    # Windows 10
+    else:
+        try:
+            # Opening w32time_time_providers key
+            w32time_time_providers = _winreg.OpenKey(
+                _winreg.HKEY_LOCAL_MACHINE,
+                utils.W32TIME_TIME_PROVIDERS,
+                0,
+                _winreg.KEY_READ
+            )
 
-            except WindowsError as _:
-                pass
+            # Searching in key values
+            for val in range(_winreg.QueryInfoKey(w32time_time_providers)[1]):
+                try:
+                    # Searching for "SpecialPollInterval"
+                    value_name, value_data, value_data_type = _winreg.EnumValue(w32time_time_providers, val)
 
-    except WindowsError as _:
-        pass
+                    if value_name == "SpecialPollInterval":
+                        # Value expressed in seconds
+                        special_poll_interval = value_data
 
-    finally:
-        # Closing w32time_time_providers key
-        _winreg.CloseKey(w32time_time_providers)
+                except WindowsError as _:
+                    pass
+
+        except WindowsError as _:
+            pass
+
+        finally:
+            # Closing w32time_time_providers key
+            _winreg.CloseKey(w32time_time_providers)
 
     # TIME_ZONE_INFORMATION
     try:
@@ -142,13 +160,21 @@ def get_registry_time_info():
         # Closing time_zone_information key
         _winreg.CloseKey(time_zone_information)
 
-    # Last known and next sync times in seconds
-    last_known_time_sec = last_known_time / 10000000
-    next_sync_time_sec = last_known_time_sec + special_poll_interval
+    # Windows 7, 8, 8.1
+    if current_win_version != "10":
+        # Last known and next sync times
+        format_last_known = "Not available"
+        format_next_sync = "Not available"
 
-    # Time format patterns
-    format_last_known = utils.webkit_to_unix_timestamp(webkit_time=last_known_time_sec, source="windows_registry")
-    format_next_sync = utils.webkit_to_unix_timestamp(webkit_time=next_sync_time_sec, source="windows_registry")
+    # Other Windows version
+    else:
+        # Last known and next sync times in seconds
+        last_known_time_sec = last_known_time / 10000000
+        next_sync_time_sec = last_known_time_sec + special_poll_interval
+
+        # Time format patterns
+        format_last_known = utils.webkit_to_unix_timestamp(webkit_time=last_known_time_sec, source="windows_registry")
+        format_next_sync = utils.webkit_to_unix_timestamp(webkit_time=next_sync_time_sec, source="windows_registry")
 
     results = {
         'last_known_time': format_last_known,

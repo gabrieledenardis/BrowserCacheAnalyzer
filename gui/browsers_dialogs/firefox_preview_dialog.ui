@@ -38,7 +38,7 @@
       <widget class="QLabel" name="label">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>12</pointsize>
          <weight>75</weight>
          <bold>true</bold>
@@ -53,7 +53,7 @@
       <widget class="QLineEdit" name="line_dialog_title">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>12</pointsize>
         </font>
        </property>
@@ -112,7 +112,7 @@
       <widget class="QLabel" name="label_4">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>9</pointsize>
          <weight>75</weight>
          <bold>true</bold>
@@ -127,7 +127,7 @@
       <widget class="QLineEdit" name="line_frequency">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>9</pointsize>
         </font>
        </property>
@@ -137,7 +137,7 @@
       <widget class="QLabel" name="label_3">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>9</pointsize>
          <weight>75</weight>
          <bold>true</bold>
@@ -152,7 +152,7 @@
       <widget class="QLabel" name="label_5">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>9</pointsize>
          <weight>75</weight>
          <bold>true</bold>
@@ -167,7 +167,7 @@
       <widget class="QLineEdit" name="line_expiration_date">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>9</pointsize>
         </font>
        </property>
@@ -177,7 +177,7 @@
       <widget class="QLineEdit" name="line_app_id">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>9</pointsize>
         </font>
        </property>
@@ -187,7 +187,7 @@
       <widget class="QLineEdit" name="line_file_size">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>9</pointsize>
         </font>
        </property>
@@ -197,7 +197,7 @@
       <widget class="QLabel" name="label_6">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>9</pointsize>
          <weight>75</weight>
          <bold>true</bold>
@@ -212,7 +212,7 @@
       <widget class="QLineEdit" name="line_flags">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>9</pointsize>
         </font>
        </property>
@@ -222,7 +222,7 @@
       <widget class="QLineEdit" name="line_url_hash">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>9</pointsize>
         </font>
        </property>
@@ -232,7 +232,7 @@
       <widget class="QLabel" name="label_7">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>9</pointsize>
          <weight>75</weight>
          <bold>true</bold>
@@ -247,7 +247,7 @@
       <widget class="QLabel" name="label_8">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>9</pointsize>
          <weight>75</weight>
          <bold>true</bold>
@@ -262,7 +262,7 @@
       <widget class="QLabel" name="label_2">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>9</pointsize>
          <weight>75</weight>
          <bold>true</bold>
@@ -277,7 +277,7 @@
       <widget class="QLineEdit" name="line_resource_uri">
        <property name="font">
         <font>
-         <family>Open Sans</family>
+         <family>Ebrima</family>
          <pointsize>9</pointsize>
         </font>
        </property>

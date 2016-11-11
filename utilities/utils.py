@@ -12,15 +12,11 @@ import os
 ######################
 
 # Paths
-ICONS_PATH = os.path.join(os.path.dirname(__file__), "..", "gui", "icons")
-JQUERY_PATH = os.path.join(os.path.dirname(__file__), "..", "static", "js", "jquery-3.1.1.min.js")
-JQUERY_TABLES_PATH = os.path.join(os.path.dirname(__file__), "..", "static", "js", "jquery.dataTables.js")
-JQUERY_DATATABLES_CSS_PATH = os.path.join(
-    os.path.dirname(__file__), "..", "static", "jquery_datatables_css", "jquery.dataTables.css"
-)
-EXPORT_OUTPUT_CSS_PATH = os.path.join(
-    os.path.dirname(__file__), "..", "static", "application_css", "export_output_style.css"
-)
+ICONS_FOLDER = os.path.join(os.path.dirname(__file__), "..", "gui", "icons")
+# STATIC_FOLDER = os.path.join(os.path.dirname(__file__), "..", "static")
+
+# Pyinstaller static path
+STATIC_FOLDER = "static"
 
 # Uninstall registry key (For user installed browsers)
 UNINSTALL_KEY = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"

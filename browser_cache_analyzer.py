@@ -409,9 +409,9 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                 self.label_browser_mark_path.clear()
 
                 # Selected browser icon
-                icon_path = os.path.join(utils.ICONS_PATH, "{icon}.png".format(icon=self.matching_browser_key))
-                browser_icon = QtGui.QPixmap(icon_path)
-                self.label_browser_icon.setPixmap(browser_icon)
+                self.label_browser_icon.setPixmap(
+                    QtGui.QPixmap(":/icons/{icon}.png".format(icon=self.matching_browser_key))
+                )
 
                 # Values for selected browser
                 self.line_browser_selected.setText(self.matching_browser_key.capitalize())
@@ -470,9 +470,9 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
                 self.label_browser_mark_path.clear()
 
                 # Selected browser icon
-                icon_path = os.path.join(utils.ICONS_PATH, "{icon}.png".format(icon=self.matching_browser_key))
-                browser_icon = QtGui.QPixmap(icon_path)
-                self.label_browser_icon.setPixmap(browser_icon)
+                self.label_browser_icon.setPixmap(
+                    QtGui.QPixmap(":/icons/{icon}.png".format(icon=self.matching_browser_key))
+                )
 
                 # Selected browser values
                 self.line_browser_selected.setText(browser_name)
@@ -490,19 +490,15 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
                 # Valid default cache path
                 if valid_default_path:
-                    mark_path = os.path.join(utils.ICONS_PATH, "mark_valid.png")
                     self.label_browser_mark_path.setToolTip("Path is valid for selected browser")
                     self.button_analyze_default_path.setEnabled(True)
+                    self.label_browser_mark_path.setPixmap(QtGui.QPixmap(":/icons/mark_valid.png"))
 
                 # Not valid default cache path
                 else:
-                    mark_path = os.path.join(utils.ICONS_PATH, "mark_not_valid.png")
                     self.label_browser_mark_path.setToolTip("Path is not valid for selected browser")
                     self.button_analyze_default_path.setEnabled(False)
-
-                # Mark for default path
-                mark_icon = QtGui.QPixmap(mark_path)
-                self.label_browser_mark_path.setPixmap(mark_icon)
+                    self.label_browser_mark_path.setPixmap(QtGui.QPixmap(":/icons/mark_not_valid.png"))
 
         # Back from "analysis screen"
         elif clicked_button == "button_analysis_screen_back":
@@ -1310,6 +1306,4 @@ class BrowserIconWidget(QtGui.QLabel):
         self.setAlignment(QtCore.Qt.AlignCenter)
 
         # Setting browser icon
-        icon_path = os.path.join(utils.ICONS_PATH, "{name}.png".format(name=icon_name))
-        browser_icon = QtGui.QPixmap(icon_path)
-        self.setPixmap(browser_icon)
+        self.setPixmap(QtGui.QPixmap(":/icons/{icon}.png".format(icon=icon_name)))

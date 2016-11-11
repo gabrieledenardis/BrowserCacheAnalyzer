@@ -3,6 +3,11 @@
     <file>icons/button_minimize.png</file>
     <file>icons/button_close.png</file>
     <file>icons/magnifying_glass.png</file>
+    <file>icons/chrome.png</file>
+    <file>icons/firefox.png</file>
+    <file>icons/opera.png</file>
+    <file>icons/mark_valid.png</file>
+    <file>icons/mark_not_valid.png</file>
     <file>icons/chrome_64x64.png</file>
     <file>icons/firefox_64x64.png</file>
     <file>icons/opera_64x64.png</file>
