@@ -27,7 +27,7 @@ class CacheResource(object):
         self.fetch_count = None
         self.last_fetched_date = None
         self.last_modified_date = None
-        self.frequency = None
+        self.frecency = None
         self.expire_date = ""
         self.key_length = None
         self.uri = ""
@@ -80,7 +80,7 @@ class CacheResource(object):
                     self.last_modified_date = datetime.datetime.fromtimestamp(last_modified_date_unix)\
                         .strftime("%A - %d %B %Y - %H:%M:%S")
 
-                self.frequency = struct.unpack(">I", f_hash.read(4))[0]
+                self.frecency = struct.unpack(">I", f_hash.read(4))[0]
 
                 expire_date_unix = struct.unpack(">I", f_hash.read(4))[0]
                 if expire_date_unix != 0:

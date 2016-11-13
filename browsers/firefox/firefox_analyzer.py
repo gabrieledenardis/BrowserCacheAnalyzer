@@ -84,7 +84,7 @@ class FirefoxAnalyzer(QtCore.QObject):
                         stop = i + 1
                         url_hash += format(struct.unpack(">B", record[start:stop])[0], "X").zfill(2)
 
-                    frequency = struct.unpack(">I", record[20:24])[0]
+                    frecency = struct.unpack(">I", record[20:24])[0]
                     expire_date_unix = struct.unpack(">I", record[24:28])[0]
                     expire_date = datetime.datetime.fromtimestamp(expire_date_unix).strftime("%A - %d %B %Y - %H:%M:%S")
                     app_id = struct.unpack(">I", record[28:32])[0]
@@ -94,7 +94,7 @@ class FirefoxAnalyzer(QtCore.QObject):
                     cache_entry_instance = cache_entry.CacheEntry(
                         entries_path=entries_path,
                         url_hash=url_hash,
-                        frequency=frequency,
+                        frecency=frecency,
                         expire_date=expire_date,
                         app_id=app_id,
                         flags=flags,

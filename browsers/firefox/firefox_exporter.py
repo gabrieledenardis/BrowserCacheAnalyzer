@@ -440,7 +440,7 @@ class FirefoxExporter(QtCore.QObject):
                     <p class='analysis_item'> <b> Fetch count: </b> {fetch_count} </p>
                     <p class='analysis_item'> <b> Last fetched date:  </b> {last_fetched_date} </p>
                     <p class='analysis_item'> <b> Last modified date: </b> {last_modified_date} </b> </p>
-                    <p class='analysis_item'> <b> Frequency: </b> {frequency} </p>
+                    <p class='analysis_item'> <b> Frecency: </b> {frecency} </p>
                     <p class='analysis_item'> <b> Expiration date: </b> {expiration_date} </p>
                     <p class='analysis_item'> <b> Key length:  </b> {key_length} </p>
                     <p class='analysis_item'> <b> URI: </b> {uri} </p>
@@ -451,7 +451,7 @@ class FirefoxExporter(QtCore.QObject):
                         fetch_count=entry.cache_resource_instance.fetch_count,
                         last_fetched_date=entry.cache_resource_instance.last_fetched_date,
                         last_modified_date=entry.cache_resource_instance.last_modified_date,
-                        frequency=entry.cache_resource_instance.frequency,
+                        frecency=entry.cache_resource_instance.frecency,
                         expiration_date=entry.cache_resource_instance.expire_date,
                         key_length=entry.cache_resource_instance.key_length,
                         uri=entry.cache_resource_instance.uri
@@ -722,7 +722,7 @@ class FirefoxExporter(QtCore.QObject):
                     <p class='analysis_item'> <b> Fetch count: </b> {fetch_count} </p>
                     <p class='analysis_item'> <b> Last fetched date:  </b> {last_fetched_date} </p>
                     <p class='analysis_item'> <b> Last modified date: </b> {last_modified_date} </b> </p>
-                    <p class='analysis_item'> <b> Frequency: </b> {frequency} </p>
+                    <p class='analysis_item'> <b> Frecency: </b> {frecency} </p>
                     <p class='analysis_item'> <b> Expiration date: </b> {expiration_date} </p>
                     <p class='analysis_item'> <b> Key length:  </b> {key_length} </p>
                     <p class='analysis_item'> <b> URI: </b> {uri} </p>
@@ -733,7 +733,7 @@ class FirefoxExporter(QtCore.QObject):
                         fetch_count=cache_resource_instance.fetch_count,
                         last_fetched_date=cache_resource_instance.last_fetched_date,
                         last_modified_date=cache_resource_instance.last_modified_date,
-                        frequency=cache_resource_instance.frequency,
+                        frecency=cache_resource_instance.frecency,
                         expiration_date=cache_resource_instance.expire_date,
                         key_length=cache_resource_instance.key_length,
                         uri=cache_resource_instance.uri

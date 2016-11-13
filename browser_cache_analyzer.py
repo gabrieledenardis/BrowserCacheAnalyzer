@@ -529,7 +529,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
             dialog_input_path = QtGui.QFileDialog().getExistingDirectory(
                 self, "Select a cache folder to analyze",
                 os.path.join("C:", os.sep, "Users", unicode(os.environ['USERNAME']), "Desktop"),
-                QtGui.QFileDialog.DontUseNativeDialog | QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.ReadOnly
+                QtGui.QFileDialog.ShowDirsOnly
             )
 
             # Path from QDialog
@@ -563,7 +563,7 @@ class BrowserCacheAnalyzer(QtGui.QMainWindow, bca_converted_gui.Ui_BrowserCacheA
 
                     QtGui.QMessageBox.warning(
                         QtGui.QMessageBox(), "Wrong input path",
-                        "{path} <br> is not correct for {browser}".format(
+                        "{path} <br> is not a valid path for {browser}".format(
                             path=dialog_input_path.replace("/", "\\"),
                             browser=browser_name
                         ),

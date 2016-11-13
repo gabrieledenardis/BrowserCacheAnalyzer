@@ -46,7 +46,7 @@ class FirefoxPreviewDialog(QtGui.QDialog, fpd_converted_gui.Ui_FirefoxPreviewDia
         self.line_dialog_title.setText(str(entry.url_hash))
         self.line_dialog_title.home(False)
         self.line_url_hash.setText(str(entry.url_hash))
-        self.line_frequency.setText(str(entry.frequency))
+        self.line_frecency.setText(str(entry.frecency))
         self.line_expiration_date.setText(str(entry.expire_date))
         self.line_app_id.setText(str(entry.app_id))
         self.line_flags.setText(str(entry.flags))
